@@ -1,0 +1,9 @@
+{
+    "manifestVersion": 1,
+    "id": "plant-tracker",
+    "name": "Plants",
+    "icon": "&#10047;",
+    "version": "0.1.0",
+    "description": "Track houseplants and when they were last watered.",
+    "keywords": ["plant", "plants", "water", "watering"]
+}

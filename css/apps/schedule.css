@@ -1,0 +1,1807 @@
+/* ===================================
+   Schedule App
+   =================================== */
+
+/* Search bar */
+.schedule-search-bar {
+    margin-bottom: var(--space-md);
+}
+
+/* Toolbar — search + Agenda/List view toggle */
+.schedule-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+/* Search — a quiet pill on the surface fill, matching the hub capsule. */
+.schedule-toolbar .search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+.schedule-toolbar .search-input:focus {
+    background: var(--color-bg);
+    border-color: var(--color-border-hover);
+    box-shadow: none;
+}
+
+/* Segmented Agenda/List control — pill capsule like the hub strip. */
+.schedule-view-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    padding: 3px;
+}
+
+.schedule-view-btn {
+    padding: 3px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.schedule-view-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.schedule-view-btn.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Quick-add — inline single-field task creation with natural-language parse */
+.schedule-quick-add-wrap {
+    margin-bottom: var(--space-md);
+}
+
+/* The composer of the page — card treatment like the Assistant's input:
+   soft shadow at rest, deeper when focused. */
+.schedule-quick-add {
+    width: 100%;
+    padding: 12px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.schedule-quick-add::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.schedule-quick-add:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+/* Live preview of what the parser recognized, shown under the input as the
+   user types. Chips echo the parsed date / time / repeat; the trailing hint
+   shows the cleaned task name that will be created. */
+.schedule-quick-add-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm) 0;
+    font-size: var(--text-xs);
+}
+
+.schedule-quick-add-preview[hidden] {
+    display: none;
+}
+
+.schedule-parse-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.schedule-parse-chip-icon {
+    color: var(--color-text-tertiary);
+}
+
+.schedule-parse-preview-title {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.schedule-parse-preview-title strong {
+    color: var(--color-text-secondary);
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* Schedule List (container for all sections) */
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* --- Sections --- */
+.schedule-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.schedule-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.schedule-section-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-section-overdue .schedule-section-title {
+    color: #dc2626;
+}
+
+.schedule-section-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Completed section toggle */
+.schedule-completed-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-xs);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.schedule-completed-toggle:hover {
+    color: var(--color-text);
+}
+
+.schedule-completed-toggle .schedule-section-title {
+    color: var(--color-text-tertiary);
+}
+
+.schedule-completed-arrow {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-left: auto;
+}
+
+.schedule-section-completed .schedule-card {
+    opacity: 0.5;
+}
+
+.schedule-section-completed .schedule-card:hover {
+    opacity: 0.75;
+}
+
+.schedule-section-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+/* --- Schedule Card — soft borderless row that fills on hover, like the
+   Assistant's conversation rail. --- */
+.schedule-card {
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    padding: 9px var(--space-md);
+    gap: var(--space-sm);
+}
+
+.schedule-card:hover {
+    background: var(--color-surface-hover);
+}
+
+.schedule-card.completed {
+    opacity: 0.5;
+}
+
+.schedule-card.completed .schedule-task-title {
+    text-decoration: line-through;
+    color: var(--color-text-tertiary);
+}
+
+/* Overdue card — the red date label and section header carry the signal;
+   no full-bleed accent band. */
+.schedule-card-overdue .schedule-date-label {
+    color: #dc2626;
+}
+
+/* Email-sourced card — no left border since Email badge is shown */
+
+/* Reschedule button (⋯) — hover-revealed on each open card, opens the quick
+   reschedule menu. Kept out of the tab/hover flow until the card is hovered so
+   it doesn't add visual weight at rest. */
+.schedule-reschedule-btn {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: var(--text-base);
+    line-height: 1;
+    color: var(--color-text-tertiary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.schedule-card:hover .schedule-reschedule-btn {
+    opacity: 1;
+}
+
+.schedule-reschedule-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+/* Off-screen-ish native date input used by "Pick date…" — transparent but
+   positioned so the browser's date picker anchors near the menu. */
+.schedule-pickdate-hidden {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Quick reschedule menu (popover) */
+.schedule-menu {
+    position: fixed;
+    z-index: 1000;
+    min-width: 168px;
+    padding: var(--space-xs);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    animation: scheduleMenuIn 0.12s ease-out;
+}
+
+@keyframes scheduleMenuIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.schedule-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.schedule-menu-item:hover {
+    background: var(--color-surface-hover);
+}
+
+.schedule-menu-sep {
+    height: 1px;
+    margin: var(--space-xs) 0;
+    background: var(--color-border-light);
+}
+
+/* Overdue header — collapse toggle + bulk "Push to today" action */
+.schedule-overdue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.schedule-overdue-pushall {
+    flex-shrink: 0;
+    padding: 3px var(--space-md);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.schedule-overdue-pushall:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+/* --- Time Column --- */
+.schedule-card-time {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.schedule-time-text {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.schedule-date-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+/* --- Content Column --- */
+.schedule-card-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    min-width: 0;
+}
+
+.schedule-card-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 1;
+    min-width: 0;
+}
+
+.schedule-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.schedule-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.schedule-task-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-width: 0;
+}
+
+.schedule-task-title {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.schedule-email-source {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-email-link {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.schedule-email-link:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+/* --- Badges --- */
+.schedule-card-badges {
+    display: flex;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.schedule-goal-badge {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    padding: 2px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.schedule-goal-badge:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.schedule-repeat-badge,
+.schedule-notify-badge {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    padding: 2px 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.schedule-email-badge {
+    font-size: var(--text-xs);
+    color: var(--color-text);
+    padding: 2px 8px;
+    background: color-mix(in srgb, var(--color-text) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* --- Current Task --- */
+.schedule-card-current {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.schedule-card-current .schedule-task-title {
+    font-weight: 600;
+}
+
+/* --- Focus Banner --- */
+.schedule-focus-banner {
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+    cursor: pointer;
+    transition: box-shadow var(--transition-base);
+}
+
+.schedule-focus-banner:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.schedule-focus-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.schedule-focus-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 1px var(--space-xs);
+    border-radius: 3px;
+}
+
+.schedule-focus-time {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.schedule-focus-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.schedule-focus-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: var(--space-xs);
+}
+
+.schedule-focus-progress-fill {
+    height: 100%;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: width var(--transition-slow);
+}
+
+.schedule-focus-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* --- Later / Upcoming Section --- */
+
+.schedule-later-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-xs);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-sm);
+    background: none;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.schedule-later-toggle:hover {
+    color: var(--color-text);
+}
+
+.schedule-later-toggle .schedule-section-title {
+    color: inherit;
+}
+
+.schedule-later-summary {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-left: auto;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.schedule-later-arrow {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.schedule-later-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.schedule-later-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.schedule-later-date-heading {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    padding: var(--space-xs) var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+/* ===================================
+   Editor
+   =================================== */
+
+.schedule-editor-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Breadcrumb can grow long (e.g. Goals > Long goal title > Task) and was
+   pushing the action buttons off the right edge. Force the title onto its
+   own row so actions wrap below; keep the default title typography for
+   consistency with other pages. */
+.schedule-editor-header .app-view-title {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.schedule-editor-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Wrapper around timer + action buttons. Sharing one auto-margin parent
+   keeps the timer right next to the buttons; without this each child had
+   its own `margin-left: auto`, which split the free space and parked the
+   timer in the middle of the row. */
+.schedule-editor-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-left: auto;
+}
+
+#schedule-editor-complete-btn.schedule-editor-complete-btn-done {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+/* Abandoned = deliberately not done — a quiet struck state, not success ink */
+#schedule-editor-abandon-btn.schedule-editor-abandon-btn-on {
+    color: var(--color-text-tertiary);
+    text-decoration: line-through;
+    background: var(--color-surface);
+}
+
+/* Recurring-task History section: one row per past due occurrence */
+.schedule-history-section {
+    margin-top: var(--space-xl);
+}
+
+.schedule-history-list {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.schedule-history-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding: 8px var(--space-lg);
+    font-size: var(--text-sm);
+}
+
+.schedule-history-row + .schedule-history-row {
+    border-top: 1px solid var(--color-border-light);
+}
+
+.schedule-history-date {
+    min-width: 90px;
+    font-weight: 600;
+}
+
+.schedule-history-iso {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    flex: 1;
+}
+
+.schedule-history-status.is-done { color: #16a34a; font-weight: 600; }
+.schedule-history-status.is-abandoned { color: #dc2626; }
+.schedule-history-status.is-none { color: var(--color-text-tertiary); }
+
+.schedule-editor-main {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* Email source banner in editor */
+.schedule-email-source-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.schedule-email-source-banner:hover {
+    background: color-mix(in srgb, var(--color-text) 15%, transparent);
+}
+
+.schedule-email-source-icon {
+    font-size: var(--text-lg);
+    color: var(--color-text);
+}
+
+.schedule-email-source-arrow {
+    margin-left: auto;
+    font-size: var(--text-lg);
+    color: var(--color-text);
+    opacity: 0.5;
+    transition: opacity var(--transition-fast);
+}
+
+.schedule-email-source-banner:hover .schedule-email-source-arrow {
+    opacity: 1;
+}
+
+.schedule-email-source-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    min-width: 0;
+}
+
+.schedule-email-source-detail span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Date row (legacy, kept for non-grid fallback) */
+.schedule-date-row {
+    margin-bottom: var(--space-md);
+}
+
+.schedule-date-row input[type="date"] {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+}
+
+.schedule-date-row input[type="date"]:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+/* Advance reminders editor */
+.schedule-reminders-section {
+    margin-bottom: var(--space-md);
+}
+
+.schedule-reminders-section > label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-reminders-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    min-height: 28px;
+}
+
+.schedule-reminders-empty {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    padding: var(--space-xs) 0;
+}
+
+.schedule-reminder-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+.schedule-reminder-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-base);
+    padding: 0 2px;
+    line-height: 1;
+}
+
+.schedule-reminder-remove:hover {
+    color: #dc2626;
+}
+
+.schedule-reminder-add-row select {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+}
+
+/* Title uses the shared .detail-title-input from components.css. */
+
+/* Compact field grid */
+.schedule-editor-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.schedule-field-row {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.schedule-field-row-3 {
+    grid-template-columns: 1.2fr 1fr 1fr;
+}
+
+.schedule-field-row-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Section label inside the editor (e.g. "When") */
+/* Section headers use the shared .detail-section-header from components.css. */
+
+/* Full-width field group (Notes, Notify) — sits outside the column grid */
+.schedule-field-group-full {
+    width: 100%;
+}
+
+/* Notes textarea */
+.schedule-description-input {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    min-height: 64px;
+}
+
+.schedule-description-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.schedule-description-input:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+/* Advanced (collapsible) section in the editor */
+.schedule-advanced-section {
+    margin-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.schedule-advanced-toggle {
+    margin-top: var(--space-xs);
+}
+
+.schedule-advanced-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding-top: var(--space-xs);
+}
+
+.schedule-field-group label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-field-group input,
+.schedule-field-group select {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+}
+
+.schedule-field-group input:focus,
+.schedule-field-group select:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+/* Keep old classes for backward compat with JS selectors */
+.schedule-time-row {
+    display: flex;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.schedule-time-group {
+    flex: 1;
+}
+
+.schedule-time-group label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+.schedule-time-group input[type="time"] {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+}
+
+.schedule-time-group input[type="time"]:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+.schedule-repeat-wrapper {
+    margin-bottom: var(--space-md);
+}
+
+.schedule-repeat-wrapper > label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-repeat-wrapper select {
+    width: 100%;
+}
+
+.schedule-weekly-options,
+.schedule-custom-options {
+    margin-top: var(--space-md);
+}
+
+.schedule-weekly-options label,
+.schedule-custom-options > label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+.schedule-days-grid {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.schedule-day-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    transition: all var(--transition-fast);
+}
+
+.schedule-day-checkbox:hover {
+    background: var(--color-surface-hover);
+}
+
+.schedule-day-checkbox input {
+    width: 14px;
+    height: 14px;
+}
+
+/* --- Timer --- */
+.schedule-timer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 2px var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.schedule-timer-btn:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.schedule-timer-btn.schedule-timer-running {
+    border-color: var(--color-text);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.schedule-timer-btn.schedule-timer-idle {
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.schedule-card:hover .schedule-timer-btn.schedule-timer-idle {
+    opacity: 1;
+}
+
+.schedule-timer-icon {
+    font-size: 8px;
+    line-height: 1;
+}
+
+.schedule-timer-display {
+    font-variant-numeric: tabular-nums;
+}
+
+.schedule-timer-badge-static {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    padding: 2px var(--space-xs);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+/* Focus banner timer */
+.schedule-focus-timer-btn {
+    font-size: var(--text-sm);
+    padding: var(--space-xs) var(--space-md);
+}
+
+.schedule-focus-timer-btn .schedule-timer-icon {
+    font-size: 10px;
+}
+
+/* Editor timer in header */
+.schedule-timer-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    margin-right: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.schedule-timer-header .schedule-editor-timer-value {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 36px;
+}
+
+.schedule-timer-header-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: var(--text-lg);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.schedule-timer-header-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.schedule-timer-header-btn.schedule-timer-reset:hover {
+    color: #dc2626;
+}
+
+/* Pomodoro launcher in the editor timer strip */
+.schedule-focus-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast);
+}
+
+.schedule-focus-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+.schedule-focus-btn.running {
+    font-weight: 600;
+}
+
+/* Legacy timer section (kept for compat) */
+.schedule-timer-section {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.schedule-timer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.schedule-timer-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.schedule-timer-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.schedule-editor-timer-value {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.schedule-timer-controls {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.schedule-timer-control-btn {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.schedule-timer-control-btn:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+.schedule-timer-control-btn.running {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.schedule-timer-control-btn.running:hover {
+    opacity: 0.85;
+}
+
+.schedule-timer-reset {
+    color: var(--color-text-secondary);
+}
+
+.schedule-timer-reset:hover {
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+/* ===================================
+   Goal searchable dropdown
+   =================================== */
+
+.schedule-goal-picker {
+    margin-bottom: var(--space-md);
+}
+
+.schedule-field-label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-goal-search-wrap {
+    position: relative;
+}
+
+.schedule-goal-search {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    padding-right: var(--space-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+}
+
+.schedule-goal-search:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+.schedule-goal-search:disabled {
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+
+/* Small lowercase hint inline with the field label, e.g. "From goal" */
+.schedule-field-hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    margin-left: 6px;
+    font-style: italic;
+}
+
+/* Color dot for focus areas in the dropdown */
+.schedule-focus-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+}
+
+.schedule-goal-clear {
+    position: absolute;
+    right: var(--space-xs);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-base);
+    padding: 2px 4px;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+}
+
+.schedule-goal-clear:hover {
+    color: #dc2626;
+    background: var(--color-surface-hover);
+}
+
+.schedule-goal-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.schedule-goal-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.schedule-goal-option:hover {
+    background: var(--color-surface-hover);
+}
+
+.schedule-goal-empty {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    cursor: default;
+}
+
+.schedule-goal-empty:hover {
+    background: none;
+}
+
+/* ===================================
+   Tasks two-pane layout: filter sidebar + list
+   =================================== */
+
+.schedule-layout {
+    display: flex;
+    align-items: flex-start;
+    /* No flex gap — the draggable resizer column owns the space between
+       the sidebar and the list, and draws the divider line itself. */
+    gap: 0;
+}
+
+.schedule-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Left filter sidebar — focus areas > goals tree.
+   Width is driven by --schedule-nav-width (set on .schedule-layout by
+   ScheduleApp) so the resizer handle can adjust it; 216px is the default. */
+.schedule-nav {
+    flex: 0 0 var(--schedule-nav-width, 216px);
+    width: var(--schedule-nav-width, 216px);
+    align-self: flex-start;
+    position: sticky;
+    /* 38px fixed titlebar + breathing room */
+    top: calc(38px + var(--space-md));
+    max-height: calc(100vh - 38px - var(--space-2xl));
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-right: var(--space-sm);
+}
+
+/* Drag handle between the filter sidebar and the task list. The thin
+   divider line lives here (the sidebar no longer draws its own border). */
+.schedule-nav-resizer {
+    flex: 0 0 var(--space-lg);
+    align-self: stretch;
+    position: relative;
+    cursor: col-resize;
+}
+
+.schedule-nav-resizer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--color-border-light);
+    transition: background var(--transition-fast), width var(--transition-fast);
+}
+
+.schedule-nav-resizer:hover::before,
+.schedule-nav-resizer.dragging::before {
+    width: 3px;
+    background: var(--color-border-hover);
+}
+
+/* While dragging, keep the resize cursor everywhere and suppress text
+   selection so the pointer doesn't highlight the task list. */
+body.schedule-nav-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.schedule-nav-section {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-md) var(--space-sm) var(--space-xs);
+}
+
+.schedule-nav-divider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: var(--space-sm);
+}
+
+.schedule-nav-node {
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 5px var(--space-sm);
+    padding-left: calc(var(--space-sm) + var(--depth, 0) * 14px);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    transition: background var(--transition-fast), color var(--transition-fast);
+    user-select: none;
+}
+
+.schedule-nav-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Active filter — surface fill + inset ring (the Assistant rail's active
+   state), calmer than a full invert. */
+.schedule-nav-item.active {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.schedule-nav-special {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.schedule-nav-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.schedule-nav-count {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.schedule-nav-item.active .schedule-nav-count {
+    color: var(--color-text-tertiary);
+}
+
+.schedule-nav-twisty {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--color-text-tertiary);
+}
+
+.schedule-nav-twisty:hover {
+    color: var(--color-text);
+}
+
+.schedule-nav-item.active .schedule-nav-twisty {
+    color: var(--color-text-secondary);
+}
+
+.schedule-nav-twisty-spacer {
+    flex-shrink: 0;
+    width: 14px;
+}
+
+.schedule-nav-swatch {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    border: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent);
+}
+
+.schedule-nav-goal .linked-item-status-dot {
+    flex-shrink: 0;
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+    .schedule-layout {
+        flex-direction: column;
+    }
+
+    .schedule-nav {
+        flex: none;
+        width: 100%;
+        position: static;
+        max-height: 220px;
+        padding-right: 0;
+        padding-bottom: var(--space-sm);
+        margin-bottom: var(--space-md);
+        border-right: none;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    /* Stacked layout — there is no horizontal edge to drag. */
+    .schedule-nav-resizer {
+        display: none;
+    }
+
+    .schedule-time-row {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .schedule-field-row-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .schedule-field-row-3 .schedule-field-group:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .schedule-card-badges {
+        flex-wrap: wrap;
+    }
+}
+
+/* ===================================
+   Task detail polish (2026-07) — calibrated to the Assistant's surfaces:
+   serif hero title, ONE quiet card for the schedule fields, pill action
+   row, soft focus states (border-hover + shadow, never a hard black ring).
+   Pure overrides, scoped to the editor; markup and JS untouched.
+   =================================== */
+
+/* Hero title — same voice as the Tasks date line and the home greeting
+   (3xl, light, tight tracking). The underline only appears on intent. */
+.schedule-editor-main input[type="text"].detail-title-input {
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    border-bottom: 1px solid transparent;
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.schedule-editor-main input[type="text"].detail-title-input:hover {
+    border-bottom-color: var(--color-border-light);
+}
+
+.schedule-editor-main input[type="text"].detail-title-input:focus {
+    border-bottom: 1px solid var(--color-border-hover);
+}
+
+/* Header action row — pill geometry, like the hub strip and the
+   Assistant's capsules. Delete steps back to a quiet ghost that only
+   shows its intent (red) on approach; Save stays the one filled pill. */
+.schedule-editor-actions .primary-btn,
+.schedule-editor-actions .secondary-btn {
+    border-radius: 999px;
+    padding: 5px 16px;
+}
+
+#schedule-editor-delete-btn {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text-tertiary);
+}
+
+#schedule-editor-delete-btn:hover {
+    color: #dc2626;
+    border-color: var(--color-border);
+    background: var(--color-surface-hover);
+}
+
+/* Timer strip matches the Assistant's status capsule. */
+.schedule-timer-header {
+    border-radius: 999px;
+    padding: 3px 6px 3px 14px;
+}
+
+/* Editor section headers — the same quiet rung the task lists use
+   (smaller, tertiary, wide tracking) so DETAILS / LINKED / HISTORY
+   whisper instead of competing with the content. */
+.schedule-editor-main .detail-section-header {
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+}
+
+/* The schedule card — date, repeat, times, notes as ONE object on a
+   surface fill, the page's visual anchor. */
+.schedule-editor-fields {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+/* Inputs on the card sit on the page background so they read as wells;
+   focus is soft — border steps up and a shadow lifts, no hard ring. */
+.schedule-field-group input,
+.schedule-field-group select {
+    height: 34px;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.schedule-field-group input:hover,
+.schedule-field-group select:hover {
+    border-color: var(--color-border-hover);
+}
+
+.schedule-field-group input:focus,
+.schedule-field-group select:focus {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.schedule-description-input {
+    border-radius: var(--radius-md);
+    min-height: 72px;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.schedule-description-input:hover {
+    border-color: var(--color-border-hover);
+}
+
+.schedule-description-input:focus {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Custom-days picker — day chips instead of raw checkboxes. The real
+   checkbox stays in the DOM (the editor reads its checked state), just
+   visually silent; :has() flips the chip to the filled state. */
+.schedule-day-checkbox {
+    position: relative;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    user-select: none;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.schedule-day-checkbox input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.schedule-day-checkbox:hover {
+    border-color: var(--color-border-hover);
+}
+
+.schedule-day-checkbox:has(input:checked) {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Linked pickers inherit the same soft input voice. */
+#schedule-linked-section input[type="text"] {
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+#schedule-linked-section input[type="text"]:hover {
+    border-color: var(--color-border-hover);
+}
+
+#schedule-linked-section input[type="text"]:focus {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Section rhythm below the card: linked, history, advanced breathe the
+   same interval. */
+#schedule-linked-section {
+    margin-top: var(--space-xl);
+}
+
+.schedule-history-section {
+    margin-top: var(--space-xl);
+}
+
+.schedule-advanced-section {
+    margin-top: var(--space-xl);
+    border-top-color: var(--color-border-light);
+}
+
+/* Embedded hosts (Tasks / Plan panes): the action row's divider steps
+   down to a hairline and hugs closer — the pane provides the frame. */
+.actions-task-detail .schedule-editor-header,
+.focus-detail-pane .schedule-editor-header {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom-color: var(--color-border-light);
+}

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+www/
+ios/build/
+.wrangler/
+.DS_Store
+*.dmg
+*.blockmap
+.claude/
+.env
+.env.*
+
+
+# Swift package build artifacts
+ios-engine/**/.build/
+ios-engine/**/xcuserdata/
