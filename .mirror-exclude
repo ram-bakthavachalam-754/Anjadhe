@@ -1,0 +1,23 @@
+# Paths stripped from the PUBLIC snapshot pushed to ram-bakthavachalam-754/Anjadhe.
+# One path per line, relative to repo root; directories end with /.
+# The snapshot is built from `git archive <tag>` (tracked files only, no history),
+# so anything not listed here becomes public. Edit freely.
+
+# --- Internal strategy / process / audit docs ---
+CLAUDE.md
+POSITIONING.md
+PRODUCT-SPEC.md
+ISSUES.md
+RELEASING.md
+SECURITY-AUDIT.md
+docs/POSITIONING.md
+docs/PLATFORM.md
+docs/COWORK_AGENT.md
+
+# --- Private-only mirror machinery (must never reach the public repo) ---
+mirror/
+.github/workflows/mirror.yml
+
+# --- Local secret files (untracked, listed defensively) ---
+.env
+.env.production
