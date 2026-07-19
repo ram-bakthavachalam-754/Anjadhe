@@ -1,0 +1,1447 @@
+/* ===================================
+   Minimal Components - Black & White Theme
+   =================================== */
+
+/* Buttons */
+.primary-btn,
+.secondary-btn,
+.icon-btn,
+.back-btn {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 7px var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    /* Keep labels on one line — in a flex footer a button otherwise shrinks to
+       its longest word and wraps mid-label (e.g. "Use default for this chat"). */
+    white-space: nowrap;
+    /* Fixed line box so a tall glyph (e.g. the &#9201; timer in the Pomodoro
+       button) can't inflate one button 2px past its siblings. */
+    line-height: 1.2;
+}
+
+.primary-btn,
+.secondary-btn,
+.icon-btn,
+.back-btn,
+.danger-btn {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.primary-btn:active,
+.secondary-btn:active,
+.icon-btn:active,
+.back-btn:active,
+.danger-btn:active {
+    transform: scale(0.97);
+}
+
+.primary-btn:focus-visible,
+.secondary-btn:focus-visible,
+.icon-btn:focus-visible,
+.back-btn:focus-visible,
+.danger-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text);
+}
+
+.primary-btn {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+/* Per-app settings gear in app headers — icon-only, quiet until hover */
+.app-settings-btn {
+    padding: 6px 10px;
+    font-size: var(--text-md);
+    line-height: 1.2;
+    color: var(--color-text-tertiary);
+}
+
+.app-settings-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.primary-btn:hover {
+    opacity: 0.85;
+}
+
+.secondary-btn:hover,
+.back-btn:hover {
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
+}
+
+.icon-btn {
+    padding: var(--space-sm);
+    min-width: 40px;
+    font-size: var(--text-lg);
+    border-radius: var(--radius-sm);
+}
+
+.icon-btn:hover {
+    background: var(--color-surface);
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.danger-btn {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 7px var(--space-lg);
+    border: 1px solid #dc2626;
+    border-radius: var(--radius-sm);
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.danger-btn:hover {
+    opacity: 0.85;
+}
+
+/* Forms */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select,
+.search-input,
+.sort-select {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    padding: 8px var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    width: 100%;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-text-tertiary);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.search-input {
+    flex: 1;
+}
+
+.sort-select {
+    width: auto;
+    min-width: 150px;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.form-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-xs);
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    border: 1.5px solid var(--color-border);
+    border-radius: 4px;
+    accent-color: var(--color-text);
+}
+
+/* Modal - Native HTML5 Dialog */
+dialog.modal {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 0;
+    margin: auto;
+    animation: modalFadeIn 200ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+dialog.modal.modal-wide {
+    max-width: 600px;
+}
+
+.modal-body .settings-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-md) 0;
+}
+
+dialog.modal::backdrop {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-header {
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: var(--text-2xl);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: var(--color-text);
+}
+
+/* Optional "open full editor" affordance, sits left of the close button.
+   margin-left:auto pulls it (and the close button after it) to the right,
+   leaving the title at the left even though the header is space-between. */
+.modal-expand {
+    margin-left: auto;
+    margin-right: var(--space-xs);
+    background: none;
+    border: none;
+    font-size: var(--text-lg);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.modal-expand:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.modal-body {
+    padding: var(--space-xl);
+}
+
+.modal-footer {
+    padding: var(--space-xl);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}
+
+/* Google connect pre-flight notice */
+.google-connect-notice p {
+    margin: 0 0 var(--space-md);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
+.google-connect-steps {
+    margin: 0 0 var(--space-md);
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.google-connect-notice .google-connect-privacy {
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border-light);
+    padding-top: var(--space-md);
+    margin-bottom: 0;
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    top: var(--space-xl);
+    right: var(--space-xl);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.toast {
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 10px var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.error {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.toast-icon {
+    font-size: var(--text-lg);
+}
+
+.toast-message {
+    flex: 1;
+    font-size: var(--text-sm);
+}
+
+/* Inline toast action (e.g. Undo). Sits on the inverted toast surface, so it
+   borrows the background colour for its text and the foreground for its fill. */
+.toast-action {
+    flex-shrink: 0;
+    margin-left: var(--space-sm);
+    padding: 3px var(--space-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.toast-action:hover {
+    opacity: 0.85;
+}
+
+.toast.error .toast-action {
+    color: var(--color-bg);
+    background: var(--color-text);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Confirmation Dialog */
+.confirm-dialog .modal {
+    max-width: 400px;
+}
+
+.confirm-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: var(--space-lg);
+}
+
+.confirm-message {
+    text-align: center;
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* Agent tool-call confirmation */
+.agent-confirm-dialog .modal {
+    max-width: 440px;
+}
+
+.agent-confirm-desc {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+}
+
+.agent-confirm-note {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    border-left: 2px solid var(--color-border);
+    padding-left: var(--space-sm);
+    margin: 0 0 var(--space-md);
+}
+
+/* Graduated consent: once / session / always (docs/COWORK_AGENT.md C1) */
+.agent-confirm-scopes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.agent-confirm-scope {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.agent-confirm-scope input {
+    flex: none;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-text);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Help Modal */
+dialog.help-modal {
+    max-width: 550px;
+    border-radius: var(--radius-lg);
+}
+
+.help-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.help-section p {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.help-section p + p {
+    margin-top: var(--space-sm);
+}
+
+.help-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.help-path {
+    font-family: monospace;
+    font-size: var(--text-xs) !important;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    word-break: break-all;
+}
+
+.help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.help-list li {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    #toast-container {
+        left: var(--space-md);
+        right: var(--space-md);
+    }
+
+    .toast {
+        min-width: auto;
+    }
+}
+
+/* ===================================
+   Button loading state
+   Applied via UIUtils.setButtonLoading(). Inline spinner + optional label.
+   =================================== */
+
+button.is-loading,
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: btn-spin 0.7s linear infinite;
+}
+
+.btn-spinner-label {
+    margin-left: 8px;
+    vertical-align: baseline;
+}
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   RichEditor v2 — floating UI primitives
+   Shared by any consumer (Journal today; Notes / Email could opt in later).
+   Positioned absolutely in viewport coordinates from rich-editor.js.
+   =================================== */
+
+/* ── Floating selection toolbar ── */
+
+.re-selection-toolbar {
+    position: fixed;
+    z-index: 200;
+    display: none;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    gap: 0;
+    box-shadow: var(--shadow-md);
+    align-items: center;
+    user-select: none;
+    /* `display: flex` is applied via .visible so the initial measurement
+       in JS doesn't treat the toolbar as a giant block. */
+}
+
+.re-selection-toolbar.visible {
+    display: inline-flex;
+}
+
+.re-selection-toolbar button {
+    background: transparent;
+    border: 0;
+    color: var(--color-bg);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    min-width: 28px;
+    transition: background var(--transition-fast);
+}
+
+.re-selection-toolbar button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.re-selection-toolbar .re-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 0 4px;
+}
+
+/* ── Table row/column toolbar (floating overlay; shown while the caret is in
+      a table, never saved with the note content) ── */
+.re-table-toolbar {
+    position: fixed;
+    z-index: 200;
+    display: none;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    box-shadow: var(--shadow-md);
+    align-items: center;
+    user-select: none;
+}
+.re-table-toolbar.visible { display: inline-flex; }
+.re-table-toolbar button {
+    background: transparent;
+    border: 0;
+    color: var(--color-bg);
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: var(--text-xs);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    white-space: nowrap;
+    transition: background var(--transition-fast);
+}
+.re-table-toolbar button:hover { background: rgba(255, 255, 255, 0.18); }
+.re-table-toolbar .re-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 0 3px;
+}
+
+/* ── Editable table (Notes/Journal rich editor) ── */
+.re-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    margin: 0.75em 0;
+    font-size: 0.95em;
+}
+.re-table th,
+.re-table td {
+    border: 1px solid var(--color-border);
+    padding: 0.4em 0.6em;
+    text-align: left;
+    vertical-align: top;
+    /* No min-width: with table-layout:fixed the column width comes entirely
+       from the <colgroup>, and a min-width floor makes drag-resize jump. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.re-table th {
+    background: var(--color-surface);
+    font-weight: 600;
+}
+.re-table tbody tr:nth-child(even) td { background: var(--color-surface-hover); }
+
+/* ── Column resize handles: fixed-position strips overlaid on the column
+      borders of the hovered table (in document.body — never part of the saved
+      note HTML). A thin guide line appears on hover/drag. ── */
+.re-col-handle {
+    position: fixed;
+    width: 9px;
+    z-index: 150;
+    cursor: col-resize;
+}
+.re-col-handle::after {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: transparent;
+    transition: background var(--transition-fast);
+}
+.re-col-handle:hover::after,
+.re-col-handle.dragging::after { background: var(--color-text); }
+body.re-col-dragging,
+body.re-col-dragging * {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+/* ── Slash menu ── */
+
+.re-slash-menu {
+    position: fixed;
+    z-index: 200;
+    display: none;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    min-width: 220px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.re-slash-menu.visible {
+    display: block;
+}
+
+.re-slash-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.re-slash-item:hover,
+.re-slash-item.active {
+    background: var(--color-surface);
+}
+
+.re-slash-label {
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+}
+
+.re-slash-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.re-slash-empty {
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    font-style: italic;
+}
+
+/* ── Inline link popover ── */
+
+.re-link-popover {
+    position: fixed;
+    z-index: 200;
+    display: none;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 6px;
+    align-items: center;
+    gap: 6px;
+}
+
+.re-link-popover.visible {
+    display: inline-flex;
+}
+
+.re-link-popover .re-link-url {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    width: 280px;
+    outline: none;
+}
+
+.re-link-popover .re-link-url:focus {
+    border-color: var(--color-text);
+}
+
+.re-link-popover .re-link-apply {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 0;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}
+
+.re-link-popover .re-link-cancel {
+    background: transparent;
+    color: var(--color-text-tertiary);
+    border: 0;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: var(--text-sm);
+}
+
+.re-link-popover .re-link-cancel:hover {
+    color: var(--color-text);
+}
+
+/* ── TagPicker popover (shared by Notes + Journal) ───────────────── */
+
+.tag-picker-popover {
+    position: fixed;
+    z-index: 220;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    width: 240px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tag-picker-search {
+    width: 100%;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+.tag-picker-search:focus {
+    border-color: var(--color-border-hover);
+    background: var(--color-bg);
+}
+
+.tag-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.tag-picker-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 6px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+.tag-picker-item:hover:not(:disabled),
+.tag-picker-item:focus-visible:not(:disabled) {
+    background: var(--color-surface-hover);
+}
+.tag-picker-item[data-selected="true"] {
+    color: var(--color-text-tertiary);
+    cursor: default;
+}
+.tag-picker-item:disabled { opacity: 0.7; }
+
+.tag-picker-create {
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: 2px;
+    padding-top: 8px;
+}
+
+.tag-picker-check {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+}
+
+.tag-picker-empty {
+    padding: 10px;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    font-style: italic;
+    text-align: center;
+}
+
+/* ── Setup Assistant (guided first-run checklist) ── */
+.setup-assistant {
+    width: 100%;
+    max-width: 560px;
+    margin: var(--space-lg) auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    background: var(--color-bg);
+    text-align: left;
+}
+
+.setup-assistant-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.setup-assistant-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+}
+
+.setup-assistant-progress {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.setup-assistant-step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.setup-assistant-step:first-child {
+    border-top: none;
+}
+
+.setup-assistant-mark {
+    flex: 0 0 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.setup-assistant-step.done .setup-assistant-mark {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.setup-assistant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.setup-assistant-step-title {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.setup-assistant-step.done .setup-assistant-step-title {
+    color: var(--color-text-tertiary);
+}
+
+.setup-assistant-step-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.setup-assistant-cta {
+    flex: 0 0 auto;
+    align-self: center;
+    white-space: nowrap;
+}
+
+.setup-assistant-dismiss {
+    margin-top: var(--space-md);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    padding: var(--space-xs) 0;
+}
+
+.setup-assistant-dismiss:hover {
+    color: var(--color-text-secondary);
+}
+
+.setup-assistant-allset {
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+/* Compact resumable strip (dashboard) */
+.setup-assistant-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.setup-assistant-strip-text {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+.setup-assistant-strip-btn {
+    flex: 0 0 auto;
+    padding: var(--space-xs) var(--space-lg);
+}
+
+.setup-assistant-strip-x {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--color-text-tertiary);
+    padding: 0 var(--space-xs);
+}
+
+.setup-assistant-strip-x:hover {
+    color: var(--color-text);
+}
+
+/* Floating first-run setup popover (bottom-right of the AI Assistant view).
+   Fixed to the viewport so it stays clear of the chat flow; collapses to a
+   pill. Reuses .setup-assistant-list / -step / -title / -progress / -dismiss. */
+.setup-popover {
+    position: fixed;
+    right: var(--space-lg);
+    bottom: var(--space-lg);
+    z-index: 60;
+    max-width: calc(100vw - 2 * var(--space-lg));
+    animation: setup-popover-in var(--transition-base) ease;
+}
+
+@keyframes setup-popover-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.setup-popover-card {
+    width: 360px;
+    max-width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-lg);
+    text-align: left;
+    /* The step list can outgrow the window (it grows over releases) —
+       cap under the 38px titlebar and scroll inside, header pinned. */
+    max-height: calc(100vh - 38px - 2 * var(--space-lg));
+    display: flex;
+    flex-direction: column;
+}
+
+.setup-popover-card > .setup-assistant-list {
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.setup-popover-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.setup-popover-head-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.setup-popover-min {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-lg);
+    line-height: 1;
+    padding: 0 var(--space-xs);
+}
+
+.setup-popover-min:hover { color: var(--color-text); }
+
+/* Tighter step rhythm than the full card, so the popover stays compact. In
+   the narrow column the CTA wraps to its own line under the text (rather than
+   squeezing the title), aligned under the step's text block. */
+.setup-popover-card .setup-assistant-step {
+    padding: var(--space-sm) 0;
+    flex-wrap: wrap;
+}
+/* Zero-height full-width break: sits (order:1) between the text block and the
+   CTA (order:2) so the CTA always drops to its own line and the title/desc get
+   the full column width instead of being squeezed beside the button. */
+.setup-popover-card .setup-assistant-step::before {
+    content: "";
+    order: 1;
+    flex-basis: 100%;
+    height: 0;
+}
+.setup-popover-card .setup-assistant-step-desc { font-size: var(--text-xs); }
+.setup-popover-card .setup-assistant-cta {
+    order: 2;
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin-top: var(--space-sm);
+    margin-left: calc(22px + var(--space-md));
+}
+.setup-popover-card .setup-assistant-dismiss { margin-top: var(--space-sm); }
+
+/* Collapsed pill */
+.setup-popover-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+}
+
+.setup-popover-pill:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+.setup-popover-pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-text);
+    flex: none;
+}
+
+/* ===================================
+   Detail-page primitives
+   Shared anatomy for the Goal, Task (and Focus drill-in) detail
+   pages: one title treatment, one section-header voice, one header-row
+   with right-aligned actions. Per-app CSS should not restyle these.
+   =================================== */
+
+/* Qualified with input[type="text"] to outrank the base text-input rule
+   above, which would otherwise re-box the title. */
+input[type="text"].detail-title-input {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    border: none;
+    border-bottom: 1px solid var(--color-border-light);
+    border-radius: 0;
+    box-shadow: none;
+    outline: none;
+    padding: 0 0 var(--space-md);
+    margin-bottom: var(--space-lg);
+    background: transparent;
+    color: var(--color-text);
+    width: 100%;
+}
+
+input[type="text"].detail-title-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+input[type="text"].detail-title-input:focus {
+    border: none;
+    border-bottom: 1px solid var(--color-text);
+    box-shadow: none;
+}
+
+.detail-section-header {
+    text-transform: uppercase;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.detail-section-count {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--color-text-tertiary);
+    margin-left: 2px;
+}
+
+.detail-section-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.detail-section-header-row .detail-section-header {
+    margin-bottom: 0;
+}
+
+.detail-section-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.detail-section-actions .secondary-btn {
+    font-size: var(--text-xs);
+    padding: 4px var(--space-md);
+    border-radius: 999px;
+}
+
+/* ---------- Task list (shared related-list, TaskListUI) ----------
+   One card holding hairline-divided rows — the same premium pattern as
+   the settings card groups. Every surface that lists linked tasks (goal
+   pages, Plan pane, focus-area detail) renders through this. */
+
+.task-list {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    overflow: hidden;
+}
+
+.task-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 8px var(--space-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.task-row + .task-row {
+    border-top: 1px solid var(--color-border-light);
+}
+
+.task-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.task-row-check {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: var(--color-text);
+    flex-shrink: 0;
+}
+
+.task-row-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text);
+    cursor: text;
+}
+
+.task-row-title:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--color-text-tertiary);
+    text-underline-offset: 3px;
+}
+
+.task-row--completed .task-row-title,
+.task-row--completed .task-row-title:hover {
+    text-decoration: line-through;
+    color: var(--color-text-tertiary);
+}
+
+/* Input that replaces the title span during an inline rename. */
+.task-row-input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-hover);
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    outline: none;
+}
+
+/* Date pill — quiet, numeric, click-to-edit. Empty rows only reveal
+   theirs on hover to keep the resting state clean. */
+/* Date column — a fixed-width right-aligned cell with a hairline rule on
+   its left, so the lists read as quiet tables (rules align row to row;
+   the old per-row pill widths couldn't). Long repeat labels ellipsize. */
+.task-row-date {
+    flex: 0 0 132px;
+    min-width: 0;
+    text-align: right;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    border-left: 1px solid var(--color-border-light);
+    padding: 2px 0 2px var(--space-md);
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.task-row-date:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--color-text-tertiary);
+    text-underline-offset: 3px;
+}
+
+.task-row-date.is-overdue {
+    color: #dc2626;
+}
+
+.task-row-date.is-empty {
+    color: var(--color-text-tertiary);
+    opacity: 0;
+}
+
+/* Keep the column rule visible even while the "Set date" hint is
+   transparent — the cell always draws its separator. */
+.task-row-date.is-empty {
+    opacity: 1;
+    color: transparent;
+}
+
+.task-row:hover .task-row-date.is-empty {
+    color: var(--color-text-tertiary);
+}
+
+.task-row:hover .task-row-date.is-empty {
+    opacity: 1;
+}
+
+/* Invisible proxy that only drives the native date picker on a pill
+   click — the pill stays visible instead of swapping to an input. */
+.task-row-date-proxy {
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Quiet icon actions (open →, unlink ×), revealed on row hover. */
+.task-row-open,
+.task-row-unlink {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    line-height: 1;
+    padding: 2px 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.task-row:hover .task-row-open,
+.task-row:hover .task-row-unlink {
+    opacity: 1;
+}
+
+.task-row-open:hover {
+    color: var(--color-text);
+}
+
+.task-row-unlink:hover {
+    color: #dc2626;
+}
+
+.task-list-empty {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    padding: var(--space-sm) 0;
+}

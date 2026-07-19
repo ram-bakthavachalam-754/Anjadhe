@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Anjadhe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mobile.css" />
+</head>
+<body>
+  <div id="app">
+    <main id="screen" aria-live="polite"></main>
+    <nav id="navbar" aria-label="Primary"></nav>
+  </div>
+
+  <!-- data + secure-channel layer (shared with the desktop build) -->
+  <script src="js/channel/channel.bundle.js"></script>
+  <script src="js/adapter/mobile-bridge.js"></script>
+  <script src="js/core/storage-manager.js"></script>
+
+  <!-- mobile front-end -->
+  <script src="app.js"></script>
+  <script src="screens/today.js"></script>
+  <script src="screens/apps.js"></script>
+  <script src="screens/search.js"></script>
+  <script src="screens/notes.js"></script>
+  <script src="screens/journal.js"></script>
+  <script src="screens/tasks.js"></script>
+  <script src="screens/calendar.js"></script>
+  <script src="screens/prompts.js"></script>
+  <script src="screens/feed.js"></script>
+  <script src="screens/bookmarks.js"></script>
+  <script src="screens/settings.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function () {
+    // The mobile bridge loads data from IndexedDB asynchronously, so we
+    // wait for the cache to be hydrated before the first render — otherwise
+    // screens would briefly show empty and then flash with content once
+    // the cache filled. Fall back to an immediate start when the promise
+    // isn't there (shouldn't happen on mobile).
+    var ready = window.__anjadheStoreReady || Promise.resolve();
+    ready.then(function () { App.start(); });
+  });</script>
+
+  <!-- pairing + sync overlays -->
+  <script src="js/adapter/mobile-pairing.js"></script>
+  <script src="js/adapter/mobile-sync.js"></script>
+</body>
+</html>
