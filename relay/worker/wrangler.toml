@@ -1,0 +1,20 @@
+# Anjadhe relay — Cloudflare Worker
+# Deploy:  cd relay/worker && npm install && npx wrangler deploy
+name = "anjadhe-relay"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+# One Durable Object per routing ID — each is a single rendezvous room.
+[[durable_objects.bindings]]
+name = "RELAY"
+class_name = "RelayRoom"
+
+# RelayRoom keeps no stored state (the live WebSockets are the room), but a
+# Durable Object class still needs a migration entry to be created.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RelayRoom"]
+
+# Request/exception logs in the Cloudflare dashboard.
+[observability]
+enabled = true

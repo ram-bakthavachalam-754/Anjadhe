@@ -1,0 +1,123 @@
+{
+  "name": "anjadhe",
+  "version": "0.1.0-alpha.9",
+  "description": "Anjadhe - Personal productivity apps for Notes, Journal, Goals, Focus",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:isolated": "ANJADHE_DATA_ROOT=/tmp/anjadhe-slate electron .",
+    "start:clean": "rm -rf /tmp/anjadhe-slate && ANJADHE_DATA_ROOT=/tmp/anjadhe-slate electron .",
+    "test": "node scripts/spec-conformance.js && node scripts/spec-render-smoke.js && node scripts/native-bridge-test.js",
+    "catalog:export": "node scripts/export-catalog.js",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:mac:dev": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac -c.mac.hardenedRuntime=false -c.mac.gatekeeperAssess=false",
+    "build:mac:publish": "electron-builder --mac --publish always",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mobile": "node scripts/build-mobile.js",
+    "cap:sync": "node scripts/build-mobile.js && npx cap sync ios",
+    "cap:open": "npx cap open ios",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
+  },
+  "author": "Anjadhe LLC",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@electron/rebuild": "^4.0.3",
+    "electron": "^40.6.0",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.0"
+  },
+  "build": {
+    "appId": "com.anjadhe.app",
+    "productName": "Anjadhe",
+    "copyright": "Copyright © 2026 Anjadhe LLC",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "js/**/*",
+      "css/**/*",
+      "ollama/ollama-manager.js",
+      "llamacpp/llamacpp-manager.js",
+      ".env.production",
+      "remote-config.json",
+      "build/icon.png",
+      "!**/node_modules/@napi-rs/**"
+    ],
+    "extraResources": [],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "ram-bakthavachalam-754",
+      "repo": "Anjadhe",
+      "releaseType": "prerelease"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": true,
+      "extendInfo": {
+        "NSBluetoothAlwaysUsageDescription": "Anjadhe uses Bluetooth so the in-app browser can sign you in with security keys and passkeys (e.g. iPhone-as-passkey)."
+      }
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
+    },
+    "dmg": {
+      "title": "Anjadhe",
+      "backgroundColor": "#ffffff",
+      "artifactName": "${productName}.${ext}"
+    }
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.112.1",
+    "@capacitor/browser": "^8.0.3",
+    "@mozilla/readability": "^0.6.0",
+    "@noble/ciphers": "^2.2.0",
+    "@noble/curves": "^2.2.0",
+    "@noble/hashes": "^2.2.0",
+    "better-sqlite3": "^12.6.2",
+    "chart.js": "^4.5.1",
+    "dompurify": "^3.3.2",
+    "dotenv": "^17.3.1",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3",
+    "jsdom": "^28.1.0",
+    "jsqr": "^1.4.0",
+    "pdfjs-dist": "^6.1.200",
+    "psl": "^1.15.0",
+    "qrcode": "^1.5.4"
+  }
+}

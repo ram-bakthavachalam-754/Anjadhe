@@ -1,0 +1,244 @@
+/* ========================================
+   Cross-App Linking — Picker & Linked Items
+   ======================================== */
+
+/* --- Link Picker Modal --- */
+
+.link-picker-modal {
+    max-width: 640px;
+    width: 90vw;
+}
+
+.link-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.link-picker-search {
+    /* Inherits from .search-input; just ensure it fills the modal */
+    margin-bottom: var(--space-xs);
+}
+
+.link-picker-list {
+    max-height: 480px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.link-picker-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.link-picker-item:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+.link-picker-item-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--color-text);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.link-picker-item-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.link-picker-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.link-picker-empty {
+    padding: var(--space-lg);
+    text-align: center;
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+
+/* --- Linked Items Display --- */
+
+.linked-items-container {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.linked-items-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-bottom: var(--space-md);
+}
+
+.linked-items-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.linked-items-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Same voice as .detail-section-header so linked sections read as part
+   of the detail-page anatomy wherever they render. */
+.linked-items-label {
+    text-transform: uppercase;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+.linked-items-add-btn,
+.linked-items-create-btn {
+    /* Inherits from secondary-btn; only override size */
+    font-size: var(--text-xs);
+    padding: 4px var(--space-md);
+}
+
+.linked-items-empty {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    padding: var(--space-xs) 0;
+}
+
+.linked-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.linked-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--text-sm);
+}
+
+.linked-item:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+.linked-item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.linked-item-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--color-text-tertiary);
+}
+
+.linked-item-status-dot.in-progress {
+    background: #16a34a;
+}
+
+.linked-item-status-dot.no-progress {
+    background: #d97706;
+}
+
+.linked-item-status-dot.need-help {
+    background: #dc2626;
+}
+
+.linked-item-status-dot.not-started,
+.linked-item-status-dot.pending {
+    background: var(--color-text-tertiary);
+}
+
+.linked-item-status-dot.completed {
+    background: #16a34a;
+}
+
+.linked-item-status-dot.overdue {
+    background: #dc2626;
+}
+
+.linked-item.linked-item-completed .linked-item-title {
+    text-decoration: line-through;
+    color: var(--color-text-tertiary);
+}
+
+.linked-item.linked-item-overdue .linked-item-meta {
+    color: #dc2626;
+}
+
+.linked-item-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text);
+}
+
+.linked-item-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.linked-item-remove {
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    padding: 0 2px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.linked-item:hover .linked-item-remove {
+    opacity: 1;
+}
+
+.linked-item-remove:hover {
+    color: #dc2626;
+}

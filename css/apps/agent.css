@@ -1,0 +1,2938 @@
+/* Agent Chat Panel + Full App View */
+
+/* Titlebar AI button — opens / closes the right-docked panel from any view. */
+#agent-toggle-btn {
+    font-size: 14px;
+}
+
+#agent-toggle-btn.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Contextual "Ask about this" CTA — floats bottom-right of the viewport
+   when the active app has provider context. Hidden when the panel is
+   already open (no point showing both) or when no context is available.
+   Sits below the panel z-index so it slides under cleanly when the
+   panel opens. */
+#agent-context-cta {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 55;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+#agent-context-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
+#agent-context-cta:active {
+    transform: translateY(0);
+}
+
+.agent-context-cta-icon {
+    font-size: 14px;
+}
+
+/* Hide the CTA while the panel is open — the user already has the chat
+   surface in front of them; a duplicate launcher is just noise. */
+body.agent-panel-open #agent-context-cta {
+    display: none !important;
+}
+
+/* Quick-start suggestions for empty conversations. Rendered into the
+   messages container; uses container's padding so the layout matches
+   the surrounding chat. */
+.agent-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0;
+}
+
+.agent-suggestions-heading {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+}
+
+.agent-suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.agent-suggestion-btn {
+    text-align: left;
+    padding: 8px 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast),
+                background var(--transition-fast), box-shadow var(--transition-fast);
+    max-width: 100%;
+}
+
+.agent-suggestion-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Right-docked panel.
+   - Sits below the titlebar (38px) and above the sidebar's z-stacking
+     (sidebar is 50; we use 60 so the panel covers it visually if a sidebar
+     entry happens to extend under it).
+   - Slides in from the right via transform; using transform keeps the
+     transition off the layout pass so other views don't reflow on toggle. */
+#agent-panel {
+    position: fixed;
+    top: 38px;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    background: var(--color-bg, #ffffff);
+    border-left: 1px solid var(--color-border, #e2e8f0);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.06);
+    z-index: 60;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+#agent-panel.open {
+    transform: translateX(0);
+}
+
+/* When the docked panel is open, shrink the views area so content
+   doesn't disappear under it. AgentUI.open()/close() toggles
+   body.agent-panel-open. The transition matches the panel slide so
+   content and panel move together. */
+#app-views {
+    transition: margin-right 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+body.agent-panel-open #app-views {
+    margin-right: 380px;
+}
+
+/* Header — a single flex gap drives all spacing so the row reads as evenly
+   breathing controls rather than items jammed against their neighbours.
+   Slightly taller than the title-bar to give the panel its own presence. */
+.agent-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 12px 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.agent-header-title {
+    font-weight: 600;
+    font-size: var(--text-base);
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+}
+
+.agent-model-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-weight: 400;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* Panel header packs items left-to-right; the model label takes the
+   auto-margin so the action buttons sit on the right edge regardless of
+   whether the context chip is currently visible (chip hides when there
+   is no active conversation yet). Inter-item spacing comes from the
+   header's flex `gap`, so no per-chip margins are needed. */
+.agent-header #agent-model-label {
+    margin-right: auto;
+    /* One line, ellipsized — long GGUF model names were wrapping the
+       docked panel's header onto three lines. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 0 1 auto;
+}
+
+/* Context-mode / thinking chips — small on/off toggles next to the model
+   label. Both states render as a clearly-readable bordered chip (so the ON
+   state never looks blank): ON is the normal/active look, OFF is dimmed to
+   read as inactive, matching the usual toggle mental model. */
+.agent-context-chip {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    text-transform: lowercase;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.agent-context-chip:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.agent-context-chip:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.agent-context-chip--off {
+    color: var(--color-text-tertiary);
+    background: transparent;
+    border-color: var(--color-border-light);
+    font-weight: 400;
+}
+
+.agent-context-chip--off:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border);
+}
+
+/* Agent/chatbot mode chip sits on the composer actions row (latency
+   diagnostic — see AgentUI.updateChatbotChip). Keep it a compact
+   single-line pill between the attach and send buttons. */
+.agent-composer-actions .agent-chatbot-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Model dropdown on the composer actions row (AgentUI.updateModelChip):
+   the chip shows the default entry as "model · engine"; the menu anchors
+   to this wrapper and opens upward (the composer sits at the bottom). */
+.agent-model-select {
+    position: relative;
+    min-width: 0;
+    /* The upper bound lives on the WRAPPER: the chip caps at 100% of it,
+       so when the flex row shrinks the wrapper (narrow docked panel), the
+       chip ellipsizes instead of overflowing under the mode chip. */
+    max-width: 260px;
+}
+
+.agent-model-select .agent-model-chip {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+
+.agent-model-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    min-width: 240px;
+    max-width: 340px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agent-model-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.agent-model-menu-item:hover {
+    background: var(--color-surface-hover);
+}
+
+.agent-model-menu-item.is-default {
+    font-weight: 600;
+}
+
+.agent-model-menu-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-model-menu-engine {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.agent-model-menu-tag {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0 6px;
+    flex-shrink: 0;
+}
+
+.agent-model-menu-tag--loaded {
+    color: #16a34a;
+}
+
+/* "in memory" shouldn't shove "default" off the row — when both show, the
+   second tag loses the auto-margin. */
+.agent-model-menu-tag + .agent-model-menu-tag {
+    margin-left: 4px;
+}
+
+.agent-model-menu-manage {
+    border-top: 1px solid var(--color-border-light);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    margin-top: 2px;
+    color: var(--color-text-secondary);
+}
+
+.agent-model-menu-empty {
+    padding: 10px;
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+}
+
+/* App-mode header: cluster model label + context chip on the right.
+   The parent .app-header-bar uses space-between with two children
+   (title + this wrapper), so the wrapper naturally sits on the right
+   while its own children flow left-to-right inside it. */
+.agent-app-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Status capsule — readiness dot + model name fused into one quiet pill so
+   the header reads as a single aligned control row instead of loose text. */
+.agent-status-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding-left: 11px;
+    padding-right: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+/* Inside the capsule the state word is redundant while things are fine —
+   the dot + tooltip carry it. It reappears for preparing/offline. */
+.agent-status-capsule .agent-readiness[data-state="ready"] .agent-readiness-text,
+.agent-status-capsule .agent-readiness[data-state="idle"] .agent-readiness-text {
+    display: none;
+}
+
+.agent-status-capsule .agent-model-label {
+    border: none;
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.agent-status-capsule .agent-model-label:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Match the memory chip to the capsule's pill geometry. */
+.agent-app-header-actions .agent-context-chip {
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: 999px;
+}
+
+/* Settings gear as a quiet ghost circle — mirrors the sidebar toggle on the
+   header's left edge, so pills sit between two matched ghost icons. */
+.agent-app-header-actions .app-settings-btn {
+    border: none;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+}
+
+.agent-app-header-actions .app-settings-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+.agent-model-label:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.agent-model-label:empty {
+    display: none;
+}
+
+.agent-model-label--override {
+    color: var(--color-text-secondary);
+}
+
+.agent-model-label--override::after {
+    content: ' \00B7 chat';
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+/* Model picker modal */
+.agent-model-picker {
+    min-width: 260px;
+}
+
+.agent-model-picker-empty {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    text-align: center;
+    padding: var(--space-sm) 0;
+}
+
+.agent-model-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.agent-model-picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--color-text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--text-sm);
+    text-align: left;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.agent-model-picker-row:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+.agent-model-picker-row.is-current {
+    background: var(--color-surface);
+    border-color: var(--color-text);
+}
+
+/* The model-name button fills the row; the row is now a flex container so an
+   optional "Unload" button can sit beside it. */
+.agent-model-picker-pick {
+    flex: 1;
+    min-width: 0; /* allow the name to ellipsize instead of forcing the row wider */
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+}
+
+.agent-model-picker-name {
+    font-family: var(--font-sans);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-model-picker-tag {
+    flex: none;
+}
+
+.agent-model-picker-tag {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.agent-model-picker-tag--loaded {
+    color: #16a34a;
+}
+
+.agent-model-picker-unload {
+    flex: none;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.agent-model-picker-unload:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.agent-model-picker-unload:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Scope dialog */
+.agent-model-scope-desc {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--text-sm);
+}
+
+/* Readiness indicator — a small dot + label in the assistant header that
+   reflects whether the local model is loaded ("Ready"), loading ("Preparing…"),
+   not loaded ("Idle"), or unavailable ("Offline"). */
+.agent-readiness {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.agent-readiness-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-text-tertiary);
+    flex: none;
+}
+
+/* Loaded and ready — replies start immediately. */
+.agent-readiness[data-state="ready"] .agent-readiness-dot { background: #16a34a; }
+.agent-readiness[data-state="ready"] { color: var(--color-text-secondary); }
+
+/* Loading the model into memory — amber, gently pulsing. */
+.agent-readiness[data-state="preparing"] .agent-readiness-dot {
+    background: #d97706;
+    animation: agent-readiness-pulse 1.2s ease-in-out infinite;
+}
+.agent-readiness[data-state="preparing"] { color: var(--color-text-secondary); }
+
+/* Installed but not loaded; first reply will be slower. */
+.agent-readiness[data-state="idle"] .agent-readiness-dot { background: var(--color-text-tertiary); }
+
+/* Unavailable. */
+.agent-readiness[data-state="offline"] .agent-readiness-dot { background: #dc2626; }
+
+@keyframes agent-readiness-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* When a local model is resident, the readiness indicator doubles as a
+   one-click "free memory" control. */
+.agent-readiness--clickable {
+    cursor: pointer;
+}
+.agent-readiness--clickable:hover {
+    color: var(--color-text);
+}
+
+/* "Free memory (unload model)" item in the overflow menu. */
+.agent-unload-chip[hidden] { display: none; }
+
+.agent-header-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.agent-header-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Overflow ("⋯") menu — home for the per-chat toggles that used to crowd
+   the header row. The wrapper anchors the absolutely-positioned dropdown. */
+.agent-overflow {
+    position: relative;
+    display: inline-flex;
+}
+
+#agent-overflow-btn[aria-expanded="true"] {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.agent-overflow-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 70;
+}
+
+.agent-overflow-menu[hidden] {
+    display: none;
+}
+
+/* Re-skin the toggle chips as full-width menu rows. Their text already
+   reads "personal context: on" / "thinking: off", so the row label doubles
+   as the state; the --off class dims an inactive row. */
+.agent-overflow-menu .agent-context-chip {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-transform: none;
+    color: var(--color-text);
+}
+
+.agent-overflow-menu .agent-context-chip.agent-context-chip--off {
+    color: var(--color-text-tertiary);
+}
+
+.agent-overflow-menu .agent-context-chip:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: transparent;
+}
+
+.agent-overflow-menu .agent-context-chip:disabled {
+    opacity: 0.4;
+}
+
+/* Shared messages area (panel + app). Doc-style layout rather than a
+   chat transcript: each Q/A reads like an article section. */
+#agent-messages,
+.agent-messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* In the full app view, give the column generous margins so the
+   article style reads like the notes/journal viewer. */
+.agent-messages-area {
+    padding: var(--space-lg) var(--space-xl) var(--space-2xl);
+}
+
+/* Messages span the full readable column — no more left/right chat
+   asymmetry. Each role styles itself differently below. */
+.agent-message {
+    display: block;
+    max-width: 100%;
+    align-self: stretch;
+}
+
+.agent-message-system {
+    align-self: center;
+    max-width: 90%;
+}
+
+/* Reasoning / "thinking" trace shown above an assistant answer — the
+   model's chain-of-thought, streamed live then collapsed to a summary.
+   Quiet and set apart from the answer so it reads as a side channel. */
+.agent-thinking-block {
+    margin: 0 0 var(--space-md);
+    border-left: 2px solid var(--color-border);
+    padding-left: var(--space-md);
+}
+
+.agent-thinking-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: transparent;
+    border: 0;
+    padding: var(--space-xs) 0;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.agent-thinking-toggle:hover {
+    color: var(--color-text-secondary);
+}
+
+.agent-thinking-caret {
+    display: inline-block;
+    font-size: 0.7em;
+    transition: transform var(--transition-fast);
+    transform: rotate(90deg); /* expanded → caret points down */
+}
+
+.agent-thinking-block--collapsed .agent-thinking-caret {
+    transform: rotate(0deg);
+}
+
+.agent-thinking-content {
+    margin-top: var(--space-xs);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    /* A step lighter than the answer text (which is --color-text) so the
+       streamed reasoning visibly reads as the side channel, not the reply. */
+    color: var(--color-text-tertiary);
+    /* Content is rendered markdown (<p>/<br>/lists) like the answer bubble, so
+       normal whitespace — pre-wrap would double the spacing from the markup. */
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.agent-thinking-block--collapsed .agent-thinking-content {
+    display: none;
+}
+/* Tame default margins on the rendered markdown inside the reasoning block. */
+.agent-thinking-content p {
+    margin: 0 0 var(--space-sm);
+}
+.agent-thinking-content p:last-child {
+    margin-bottom: 0;
+}
+.agent-thinking-content ul,
+.agent-thinking-content ol {
+    margin: var(--space-xs) 0 var(--space-sm);
+    padding-left: 1.5rem;
+}
+
+/* Gentle pulse on the label while the model is still reasoning. */
+.agent-thinking-block--live .agent-thinking-label {
+    animation: agentThinkingPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes agentThinkingPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.45; }
+}
+
+.agent-bubble {
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text);
+    /* Matches the note editor/viewer body (.note-content-editor /
+       .note-content-display) so reading a reply feels like reading a note. */
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* User message: rendered as the heading of this section. A border-top
+   separates consecutive Q/A exchanges; the first message in the chat
+   omits the border so the conversation doesn't open with a stray line. */
+.agent-message-user .agent-bubble {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    padding: var(--space-md) 0 var(--space-sm);
+}
+
+/* Separator before a follow-up question — only when there's an actual
+   prior assistant answer (a tool indicator or streaming bubble also
+   counts as part of the previous turn). */
+.agent-message-assistant + .agent-message-user .agent-bubble,
+.agent-message-tool + .agent-message-user .agent-bubble {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-2xl);
+    margin-top: var(--space-md);
+}
+
+/* "Edit & resend" control on the latest question. Subtle — hidden until the
+   question is hovered/focused, so it stays out of the way. */
+.agent-message-user { position: relative; }
+
+.agent-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 var(--space-sm);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    line-height: 1;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.agent-message-user:hover .agent-edit-btn,
+.agent-edit-btn:focus-visible {
+    opacity: 1;
+}
+
+.agent-edit-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+}
+
+/* Panel is narrow (380px) — scale the type down a step from the full-app
+   view so the docked column reads as a focused side channel rather than a
+   full-width article. The question heading steps down 2xl→xl and answer
+   prose base→sm, keeping the heading/body hierarchy. */
+#agent-messages .agent-message-user .agent-bubble {
+    font-size: var(--text-xl);
+}
+
+#agent-messages .agent-message-assistant .agent-bubble {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+}
+
+/* Keep in-answer markdown headings proportional to the smaller panel body
+   (the full-app view keeps the larger default scale). */
+#agent-messages .agent-bubble h3 { font-size: var(--text-base); }
+#agent-messages .agent-bubble h4 { font-size: var(--text-sm); }
+
+/* Assistant answer: flowing article-style prose. Inter at 0.9375rem/1.75
+   — the same body setting as the note editor/viewer (.note-content-editor)
+   so reading a reply feels like reading a note. */
+.agent-message-assistant .agent-bubble {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    letter-spacing: -0.003em;
+    padding: 0 0 var(--space-md);
+    -webkit-font-smoothing: antialiased;
+}
+
+.agent-bubble code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light, var(--color-border));
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* PDF page-citation chips. Rendered inline inside agent replies so
+ * they read as part of the sentence; the click handler in agent-ui
+ * jumps the PDF iframe to the cited page. */
+.agent-pdf-page-cite {
+    display: inline;
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
+    background: var(--color-surface, rgba(0, 0, 0, 0.04));
+    color: var(--color-text-secondary, #475569);
+    border-radius: 4px;
+    padding: 0 5px;
+    margin: 0 1px;
+    font-size: 0.85em;
+    font-family: var(--font-sans, inherit);
+    cursor: pointer;
+    line-height: 1.4;
+    vertical-align: baseline;
+    transition: background var(--transition-fast, 150ms), color var(--transition-fast, 150ms);
+}
+
+.agent-pdf-page-cite:hover {
+    background: var(--color-text, #1a1a1a);
+    color: var(--color-bg, #fff);
+    border-color: var(--color-text, #1a1a1a);
+}
+
+.agent-pdf-page-cite:focus {
+    outline: 2px solid var(--color-text, #1a1a1a);
+    outline-offset: 1px;
+}
+
+/* Markdown block elements inside assistant prose. Article-style spacing
+   and typography — matches the notes/journal viewer feel. */
+.agent-bubble p {
+    margin: 0 0 var(--space-md);
+}
+.agent-bubble p:last-child {
+    margin-bottom: 0;
+}
+.agent-bubble ul,
+.agent-bubble ol {
+    margin: var(--space-sm) 0 var(--space-md);
+    padding-left: 1.5rem;
+}
+.agent-bubble li {
+    margin: var(--space-xs) 0;
+}
+.agent-bubble li > p {
+    margin-bottom: var(--space-xs);
+}
+.agent-bubble h3,
+.agent-bubble h4,
+.agent-bubble h5 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.3;
+    margin: var(--space-lg) 0 var(--space-xs);
+    color: var(--color-text);
+}
+.agent-bubble h3 { font-size: var(--text-xl); }
+.agent-bubble h4 { font-size: var(--text-lg); }
+.agent-bubble h5 {
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+}
+.agent-bubble h3:first-child,
+.agent-bubble h4:first-child,
+.agent-bubble h5:first-child { margin-top: 0; }
+.agent-bubble a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+.agent-bubble a:hover { opacity: 0.7; }
+.agent-bubble hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-lg) 0;
+}
+.agent-bubble table {
+    border-collapse: collapse;
+    margin: var(--space-md) 0;
+    font-size: var(--text-sm);
+    width: 100%;
+}
+.agent-bubble th,
+.agent-bubble td {
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.5;
+}
+.agent-bubble th {
+    background: var(--color-surface);
+    font-weight: 600;
+}
+
+/* System messages */
+.agent-system-text {
+    font-size: 12px;
+    color: var(--text-secondary, #64748b);
+    background: var(--bg-secondary, #f1f5f9);
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Footer chips under the assistant response — quiet, left-aligned so
+   they read as metadata rather than a chat tail. The two sit on the
+   same line with a separator. */
+.agent-response-time,
+.agent-message-model {
+    display: inline-block;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+}
+
+/* Sources footer — provenance for a web-derived answer: the pages actually
+   read, as a numbered list of title + site rows, above the queries that
+   found them. Collapsible (open for short lists), one hairline above. */
+.agent-sources {
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.agent-sources-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 0;
+    color: var(--color-text-tertiary);
+}
+
+.agent-sources-summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Disclosure caret — rotates down when the list is open. */
+.agent-sources-summary::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 4px solid currentColor;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.agent-sources[open] > .agent-sources-summary::before {
+    transform: rotate(90deg);
+}
+
+.agent-sources-summary:hover {
+    color: var(--color-text-secondary);
+}
+
+.agent-sources-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.agent-sources-hosts {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* The host preview is the collapsed-state stand-in for the list itself. */
+.agent-sources[open] > .agent-sources-summary > .agent-sources-hosts {
+    display: none;
+}
+
+.agent-sources-body {
+    padding-top: var(--space-xs);
+}
+
+/* Scoped under .agent-sources to outrank the bubble's markdown list/link
+   rules (.agent-bubble ol / .agent-bubble a), which this list is nested in. */
+.agent-sources .agent-source-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agent-sources .agent-source-item {
+    margin: 0;
+}
+
+.agent-sources .agent-source-link {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.agent-sources .agent-source-link:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-light);
+    opacity: 1;
+}
+
+/* Citation-style index — matches the numbering readers expect next to a claim. */
+.agent-source-num {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.agent-source-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.agent-source-title {
+    font-size: var(--text-xs);
+    line-height: 1.35;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-sources .agent-source-link:hover .agent-source-title {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.agent-source-host {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-source-open {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.agent-sources .agent-source-link:hover .agent-source-open {
+    opacity: 1;
+}
+
+/* The queries behind the sources — pill-shaped, glyph-led, so they read as
+   search boxes rather than as more (clickable) sources. Quieter than the
+   pages: this is how the agent looked, not what it found. */
+.agent-source-searches {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin-top: 6px;
+    padding: 0 8px;
+}
+
+.agent-source-query {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: 999px;
+    padding: 2px 10px 2px 8px;
+}
+
+/* Magnifier: a hairline circle plus a handle, drawn rather than typeset. */
+.agent-source-query-icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    margin-right: 2px;
+    border: 1.25px solid currentColor;
+    border-radius: 50%;
+    color: var(--color-text-tertiary);
+}
+
+.agent-source-query-icon::after {
+    content: '';
+    position: absolute;
+    right: -2.5px;
+    bottom: -2px;
+    width: 4px;
+    height: 1.25px;
+    border-radius: 1px;
+    background: currentColor;
+    transform: rotate(45deg);
+}
+
+.agent-source-query-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-response-time {
+    margin-top: var(--space-sm);
+    margin-right: var(--space-xs);
+}
+
+.agent-response-time + .agent-message-model::before {
+    content: '·';
+    margin: 0 var(--space-xs);
+    color: var(--color-text-tertiary);
+    opacity: 0.6;
+}
+
+.agent-system-text code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Tool indicators */
+.agent-tool-indicator {
+    font-size: 12px;
+    color: var(--text-secondary, #64748b);
+    padding: 3px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.agent-tool-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--success-color, #22c55e);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.agent-tool-args {
+    margin-left: 4px;
+    opacity: 0.6;
+    font-size: 11px;
+}
+
+.agent-tool-args::before {
+    content: '(';
+}
+
+.agent-tool-args::after {
+    content: ')';
+}
+
+/* Fenced code blocks in assistant replies: header bar (language + copy),
+   monospace body with its own horizontal scroll. */
+.agent-bubble .agent-codeblock {
+    margin: var(--space-sm) 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+
+.agent-bubble .agent-codeblock-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 10px;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.agent-bubble .agent-codeblock-lang {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-tertiary);
+}
+
+.agent-code-copy {
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.agent-code-copy:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.agent-bubble .agent-codeblock pre {
+    margin: 0;
+    padding: var(--space-sm) 10px;
+    overflow-x: auto;
+}
+
+.agent-bubble .agent-codeblock code {
+    display: block;
+    background: none;
+    padding: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre;
+    color: var(--color-text);
+}
+
+/* Whole-response copy — revealed on message hover, ChatGPT/Claude style.
+   A comfortable pill: 14px clipboard glyph + 12px label (the old 11px ⎘
+   character read as a speck). */
+.agent-msg-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.agent-msg-copy svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.agent-message-assistant:hover .agent-msg-copy,
+.agent-msg-copy:focus-visible {
+    opacity: 1;
+}
+
+.agent-msg-copy:hover {
+    color: var(--color-text);
+    border-color: var(--color-border);
+    background: var(--color-surface-hover);
+}
+
+/* "Open note" affordance on a create-tool chip — the created thing is one
+   click away instead of buried behind navigation. */
+.agent-tool-open {
+    margin-left: var(--space-sm);
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.agent-tool-open:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+/* Record pills under an assistant answer — one per record the agent
+   created/updated this turn (metadata.records), click to open it. */
+.agent-msg-records {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: var(--space-sm);
+}
+
+.agent-record-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 3px 10px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.agent-record-pill:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+}
+
+.agent-record-pill-kind {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.agent-record-pill-title {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Thinking animation */
+.agent-thinking {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px;
+}
+
+.agent-thinking span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary, #94a3b8);
+    animation: agent-pulse 1.4s infinite;
+}
+
+.agent-thinking span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.agent-thinking span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes agent-pulse {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Input area (shared between panel and app) */
+/* ── Composer ─────────────────────────────────────────────────────────
+   One bordered card holds the whole composer: pending-attachment chips on
+   top, an auto-growing textarea (Enter sends, Shift+Enter breaks a line),
+   and an actions row with attach (left) and send (right). The outer
+   .agent-input-bar is just the padded slot the card sits in. */
+.agent-input-bar {
+    display: block;
+    padding: 10px 16px 12px;
+    flex-shrink: 0;
+}
+
+.agent-composer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.agent-composer:focus-within {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.agent-composer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Attach button — quiet outlined circle on the actions row. */
+.agent-attach-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.agent-attach-btn:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* Pending-attachment strip inside the composer card, above the textarea. */
+.agent-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 0 4px;
+    flex-shrink: 0;
+}
+
+.agent-attachment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 4px 6px 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-size: var(--text-xs);
+}
+
+.agent-attachment-name {
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.agent-attachment-meta {
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+.agent-attachment-remove {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+}
+
+.agent-attachment-remove:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* Attachment chips inside a sent user message. */
+.agent-msg-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.agent-msg-attachment {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    font-size: var(--text-xs);
+}
+
+.agent-msg-attachment-name {
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.agent-msg-attachment-meta {
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+/* Drag-a-file-over-the-chat affordance. */
+#agent-panel.agent-drop-active,
+.agent-chat-main.agent-drop-active,
+.dash-agent-hero.agent-drop-active {
+    outline: 2px dashed var(--color-border-hover);
+    outline-offset: -6px;
+}
+
+/* The textarea is borderless — the composer card carries the chrome. Height
+   is driven by AgentUI._autoGrowComposer (grows with content, caps and
+   scrolls past ~7 lines). */
+#agent-input,
+#agent-app-input,
+#dash-agent-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 2px;
+    border: none;
+    border-radius: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    font-family: inherit;
+    background: transparent;
+    color: var(--color-text);
+    outline: none;
+    resize: none;
+    /* Beat the global `textarea { min-height: 100px }` from components.css —
+       the composer starts one line tall and grows with content. */
+    min-height: calc(1.45em + 8px);
+    max-height: 190px;
+    overflow-y: auto;
+    box-shadow: none;
+}
+
+/* The card's :focus-within carries the focus look — kill the global
+   textarea:focus ring/border inside it. */
+#agent-input:focus,
+#agent-app-input:focus,
+#dash-agent-input:focus {
+    border: none;
+    box-shadow: none;
+}
+
+#agent-input::placeholder,
+#agent-app-input::placeholder,
+#dash-agent-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+#agent-send-btn,
+#agent-app-send-btn,
+#dash-agent-send-btn {
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+#agent-send-btn:hover,
+#agent-app-send-btn:hover,
+#dash-agent-send-btn:hover {
+    opacity: 1;
+    transform: scale(1.06);
+    box-shadow: var(--shadow-md);
+}
+
+#agent-send-btn:active,
+#agent-app-send-btn:active,
+#dash-agent-send-btn:active {
+    transform: scale(0.96);
+}
+
+/* Stop state: same circular button, smaller square glyph so it reads as a
+   stop control while staying on-theme (monochrome). */
+#agent-send-btn.agent-send-btn--stop,
+#agent-app-send-btn.agent-send-btn--stop {
+    font-size: 12px;
+}
+
+/* Queued-message strip — same slot as the attachments strip, dashed chips so
+   they read as "waiting", not sent. Ends with the "Send now" control. */
+.agent-queued {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 0 0 4px;
+    flex-shrink: 0;
+}
+
+/* display:flex above beats the UA [hidden] rule — hide explicitly. */
+.agent-queued[hidden] {
+    display: none;
+}
+
+.agent-queued-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 4px 6px 4px 10px;
+    border: 1px dashed var(--color-border-hover);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-size: var(--text-xs);
+}
+
+.agent-queued-label {
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.agent-queued-meta {
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+.agent-queued-remove {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+}
+
+.agent-queued-remove:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* Interrupt & send — lives on the strip with the messages it acts on. */
+.agent-queued-sendnow {
+    padding: 4px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform var(--transition-fast);
+}
+
+.agent-queued-sendnow:hover {
+    transform: scale(1.04);
+}
+
+/* Warming affordance: while the local model loads, the send button softens
+   and gently pulses — sending still works, it just signals "not instant yet". */
+#agent-send-btn.agent-send-btn--warming,
+#agent-app-send-btn.agent-send-btn--warming {
+    opacity: 0.55;
+    animation: agent-readiness-pulse 1.6s ease-in-out infinite;
+}
+
+/* Composer warming hint — a thin line above the input while the model loads.
+   Amber dot matches the "preparing" readiness dot; the copy reframes the wait
+   as a one-time load. */
+.agent-warming-hint {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    /* Left padding matches the composer slot (.agent-input-bar) so the hint
+       lines up with the composer's left edge instead of the page edge. */
+    padding: 7px 16px 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    user-select: none;
+    /* Constrain to the same centered column as the messages + composer;
+       otherwise the hint spans full width and floats to the far left. */
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.agent-app-layout .agent-warming-hint {
+    max-width: 760px;
+}
+
+.agent-warming-hint[hidden] { display: none; }
+
+.agent-warming-hint-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #d97706;
+    flex: none;
+    animation: agent-readiness-pulse 1.2s ease-in-out infinite;
+}
+
+/* In-stream warming indicator — replaces the anonymous thinking dots on a cold
+   send so the wait reads as a model load, not a slow reply. */
+.agent-warming-indicator {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+}
+
+.agent-warming-spinner {
+    width: 14px;
+    height: 14px;
+    margin-top: 1px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-text-secondary);
+    flex: none;
+    animation: agent-warming-spin 0.8s linear infinite;
+}
+
+.agent-warming-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.agent-warming-title {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+.agent-warming-note {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+@keyframes agent-warming-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Build progress card — live App Studio / Maker build driven from the chat
+   (AgentUI.onBuildProgress). One card per build: title + status + rolling
+   action log, then a done/failed state with an open button. */
+.agent-build-card {
+    margin: 6px 0;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    max-width: 85%;
+}
+
+.agent-build-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.agent-build-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.agent-build-elapsed {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.agent-build-status {
+    margin-top: 4px;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.agent-build-status:empty {
+    display: none;
+}
+
+/* Step timeline: finished phases keep their check and stay readable;
+   the active phase pulses. Text wraps — never truncates. */
+.agent-build-steps {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.agent-build-steps:empty {
+    display: none;
+}
+
+.agent-build-step {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    line-height: 1.5;
+}
+
+.agent-build-step-mark {
+    flex: none;
+    width: 12px;
+    text-align: center;
+}
+
+.agent-build-step-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.agent-build-step--done .agent-build-step-mark::before {
+    content: '\2713';
+    color: #16a34a;
+}
+
+.agent-build-step--failed .agent-build-step-mark::before {
+    content: '\2715';
+    color: #dc2626;
+}
+
+.agent-build-step--active {
+    color: var(--color-text);
+}
+
+@keyframes agent-build-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+}
+
+.agent-build-step--active .agent-build-step-mark::before {
+    content: '\25CF';
+    animation: agent-build-pulse 1.4s ease-in-out infinite;
+}
+
+/* Calm one-line signal for high-volume token streams
+   ("Reasoning… 3.2k characters"). */
+.agent-build-activity {
+    margin-top: 4px;
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+}
+
+.agent-build-activity:empty {
+    display: none;
+}
+
+.agent-build-card--error {
+    border-color: #dc2626;
+}
+
+.agent-build-card--error .agent-build-status {
+    color: #dc2626;
+}
+
+.agent-build-open {
+    margin-top: var(--space-sm);
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-bg);
+    background: var(--color-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.agent-build-open:hover {
+    opacity: 0.85;
+}
+
+/* Task progress card (C4) — shares the build card's chrome. */
+.agent-task-card {
+    margin: 6px 0;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    max-width: 85%;
+}
+
+.agent-task-card--failed {
+    border-color: #dc2626;
+}
+
+.agent-task-card--done {
+    border-color: var(--color-text);
+}
+
+.agent-task-goal {
+    margin-top: 4px;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+.agent-task-steps {
+    margin-top: var(--space-xs);
+}
+
+.agent-task-step {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    padding: 1px 0;
+}
+
+.agent-task-step-icon {
+    flex: none;
+    width: 1.1em;
+    text-align: center;
+}
+
+.agent-task-step--done .agent-task-step-icon { color: #16a34a; }
+.agent-task-step--failed { color: #dc2626; }
+.agent-task-step--active { color: var(--color-text); }
+
+.agent-task-step-note {
+    color: var(--color-text-tertiary);
+}
+
+.agent-task-actions {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+}
+
+.agent-task-btn {
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.agent-task-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+.agent-task-btn--primary {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.agent-task-btn--primary:hover {
+    opacity: 0.85;
+    background: var(--color-text);
+}
+
+
+/* ========================
+   Full App View Layout
+   ======================== */
+
+#agent-view.active {
+    display: flex;
+    flex-direction: column;
+    /* Subtract the fixed 38px titlebar — the view is offset below it by
+       #app-container's padding-top, so a full 100vh overflows and creates an
+       unnecessary page-level scrollbar. The chat scrolls internally instead. */
+    height: calc(100vh - 38px);
+    overflow: hidden;
+}
+
+#agent-view .app-header-bar {
+    flex-shrink: 0;
+    /* Tighter than the page default — this is a full-height workspace, not a
+       scrolling document, and the rail should feel attached to the header. */
+    margin-bottom: var(--space-md);
+}
+
+.agent-app-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* History sidebar */
+.agent-history-sidebar {
+    width: 260px;
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width var(--transition-base), border-color var(--transition-base);
+}
+
+/* Collapsed conversation sidebar — slides shut; the chat (flex:1) expands to
+   fill. Toggled from the header button next to the title. */
+.agent-app-layout.sidebar-collapsed .agent-history-sidebar {
+    width: 0;
+    border-right-color: transparent;
+}
+
+/* Header left group: sidebar toggle + title */
+.agent-app-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-width: 0;
+}
+
+/* Quiet ghost icon — boxing it made the header's left edge read heavier
+   than the title it sits beside. */
+.agent-sidebar-toggle {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-lg);
+    line-height: 1;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.agent-sidebar-toggle:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* No hairline under New Chat — whitespace separates it from the list,
+   matching how the header separates from the page. */
+.agent-history-header {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+/* New Chat: the sidebar's primary action. Give it the softer radius and a
+   little tactility (subtle shadow + a lift on hover) so it reads as a crafted
+   button rather than a flat black bar. */
+.agent-history-header .primary-btn {
+    width: 100%;
+    padding: 9px var(--space-lg);
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.agent-history-header .primary-btn:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.agent-history-header .primary-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Subtle "memory" chip in the chat header (next to the model label). Inherits
+   the .agent-context-chip look; --active marks the panel as open. */
+.agent-memory-chip--active {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.agent-history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 var(--space-sm) var(--space-md);
+}
+
+/* Date-bucket labels between conversations (Today / Yesterday / …) — the
+   theme's uppercase micro section-header idiom. */
+.agent-history-group-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    padding: var(--space-lg) var(--space-md) var(--space-xs);
+    user-select: none;
+}
+
+.agent-history-group-label:first-child {
+    padding-top: var(--space-xs);
+}
+
+.agent-history-empty {
+    padding: var(--space-xl);
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+/* Each conversation is an inset rounded row: hover/active fill as a soft pill
+   with margin around it, rather than a full-bleed band with a hard left-border
+   accent. Reads calmer and more premium, like a modern chat sidebar. */
+.agent-history-item {
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    position: relative;
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.agent-history-item:hover {
+    background: var(--color-surface-hover);
+}
+
+.agent-history-item.active {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.agent-history-item-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 24px;
+    line-height: 1.4;
+}
+
+.agent-history-item:not(.active) .agent-history-item-title {
+    font-weight: 400;
+}
+
+.agent-history-streaming-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text);
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: agent-streaming-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes agent-streaming-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+/* "Related record" chip on a history item — which task/note/… the
+   chat was started over. Type tag reads as a quiet uppercase label, the
+   record name truncates to one line. */
+.agent-history-item-record {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 3px;
+    padding-right: 24px;
+    min-width: 0;
+}
+
+.agent-history-item-record-type {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0 4px;
+    line-height: 1.5;
+}
+
+.agent-history-item-record-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.agent-history-item-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+}
+
+.agent-history-item-delete {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.agent-history-item:hover .agent-history-item-delete {
+    opacity: 1;
+}
+
+.agent-history-item-delete:hover {
+    color: var(--color-text);
+}
+
+.agent-conv-badge {
+    display: inline-block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-tertiary);
+    margin-left: var(--space-xs);
+    vertical-align: middle;
+}
+
+/* Chat main area */
+.agent-chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.agent-messages-area {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.agent-chat-main .agent-input-bar {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* In the full AI Assistant app view, keep the chat as a centered, readable
+   column (like Claude / Gemini) rather than stretching it the full page width.
+   The page + sidebar stay full-width; only the message/input column is capped
+   and centered, so it stays comfortable whether the sidebar is open or not. */
+.agent-app-layout .agent-messages-area,
+.agent-app-layout .agent-chat-main .agent-input-bar {
+    max-width: 760px;
+    margin-inline: auto;
+}
+
+/* ── Memory profile panel ─────────────────────────────────────────────
+   Overlays the chat column when open: the chat's message area + input are
+   hidden and the profile editor takes their place. */
+.agent-chat-main.profile-open .agent-messages-area,
+.agent-chat-main.profile-open .agent-input-bar,
+.agent-chat-main.profile-open .agent-record-banner {
+    display: none !important;
+}
+
+.agent-profile-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+    box-sizing: border-box;
+}
+
+/* The class selector above would otherwise override the `hidden` attribute
+   (class beats the UA [hidden] rule), leaving the panel permanently visible
+   under the chat. This attribute selector has higher specificity, so the
+   panel truly hides until opened. */
+.agent-profile-panel[hidden] {
+    display: none;
+}
+
+.agent-profile-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-lg) var(--space-md) var(--space-md);
+}
+
+.agent-profile-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    margin: 0;
+}
+
+.agent-profile-sub {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.agent-profile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.agent-profile-sections {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-xs) var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.agent-profile-section {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--color-surface);
+}
+
+.agent-profile-section:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.agent-profile-section-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.agent-profile-section-title {
+    flex: 1;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-text);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    min-width: 0;
+}
+
+.agent-profile-section-title:hover {
+    border-color: var(--color-border);
+}
+
+.agent-profile-section-title:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    background: var(--color-bg);
+}
+
+.agent-profile-badge {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1px var(--space-xs);
+    white-space: nowrap;
+}
+
+.agent-profile-section-del {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-base);
+    line-height: 1;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.agent-profile-section:hover .agent-profile-section-del {
+    opacity: 1;
+}
+
+.agent-profile-section-del:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.agent-profile-section-body {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    padding: var(--space-sm);
+    resize: none;
+    overflow: hidden;
+}
+
+.agent-profile-section-body:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+}
+
+.agent-profile-section-body::placeholder {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+.agent-profile-footer {
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
+/* Related-record banner — a slim, fixed header above the scrolling message
+   column naming what the conversation is about. Aligned to the same centered
+   760px column as the messages, with matching horizontal inset. */
+.agent-record-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border-light, var(--color-border));
+    flex: 0 0 auto;
+}
+
+/* Conversation goal — one quiet line just above the composer stating what
+   the chat is working toward (AgentUI.updateGoalBanner). Display-only:
+   the user steers it by saying so in chat. */
+.agent-goal-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 2px 16px 6px;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.agent-goal-banner[hidden] {
+    display: none;
+}
+
+.agent-goal-banner-label {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1px 5px;
+}
+
+.agent-goal-banner-text {
+    min-width: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.agent-record-banner[hidden] {
+    display: none;
+}
+
+.agent-record-banner-icon {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.agent-record-banner-text {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.agent-record-banner-type {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1px 5px;
+}
+
+.agent-record-banner-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty-state composer — a fresh chat with no messages floats its greeting
+   and input box to the vertical centre of the column (like ChatGPT / Claude)
+   instead of pinning the input to the bottom of an empty page. The
+   .agent-chat-main--empty class is added in renderMessages only for the full
+   app view and removed the moment the first message is sent, restoring the
+   normal bottom-docked layout. */
+.agent-chat-main--empty {
+    justify-content: center;
+}
+
+/* Stop the messages area from greedily growing so the [greeting + input]
+   group sits as a centred block rather than the input being pushed down. */
+.agent-chat-main--empty .agent-messages-area {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding-bottom: var(--space-md);
+}
+
+.agent-empty-hero {
+    text-align: center;
+    padding: var(--space-sm) var(--space-md) var(--space-lg);
+}
+
+.agent-empty-hero-title {
+    /* Mirror the home "Good evening" greeting — large, light-weight serif with
+       tight tracking reads far more premium than a bold heading. */
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin: 0;
+}
+
+/* Centre the quick-start chips under the greeting in the empty state. */
+.agent-chat-main--empty .agent-suggestions {
+    align-items: center;
+    text-align: center;
+}
+
+/* ── First-visit waking-up hero ──
+   Shown instead of "How can I help?" while the local model loads on the
+   user's first-ever visit; the readiness watch swaps it out on 'ready'. */
+.agent-first-warm-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    margin: 0 auto var(--space-md);
+    display: block;
+}
+
+.agent-first-warm-status {
+    margin: var(--space-md) 0 0;
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+}
+
+/* Indeterminate hairline: a short segment sliding along a border-colored
+   track — quiet proof of work in the book theme's vocabulary. */
+.agent-first-warm-bar {
+    position: relative;
+    width: 180px;
+    height: 2px;
+    margin: var(--space-lg) auto 0;
+    background: var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.agent-first-warm-bar span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 48px;
+    height: 100%;
+    background: var(--color-text);
+    border-radius: 2px;
+    animation: agent-first-warm-slide 1.6s ease-in-out infinite;
+}
+
+@keyframes agent-first-warm-slide {
+    0%   { transform: translateX(-48px); }
+    100% { transform: translateX(180px); }
+}
+
+.agent-first-warm-note {
+    max-width: 44ch;
+    margin: var(--space-lg) auto 0;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-text-tertiary);
+}
+
+/* The waking logo breathes gently while loading. */
+.agent-first-warm .agent-first-warm-logo {
+    animation: agent-first-warm-breathe 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes agent-first-warm-breathe {
+    from { opacity: 0.65; transform: scale(1); }
+    to   { opacity: 1;    transform: scale(1.04); }
+}
+
+/* Ready: the greeting fades up in place of the loading composition. */
+.agent-first-warm-done .agent-empty-hero-title {
+    animation: agent-first-warm-in 0.4s ease both;
+}
+
+@keyframes agent-first-warm-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .agent-first-warm-bar span,
+    .agent-first-warm .agent-first-warm-logo,
+    .agent-first-warm-done .agent-empty-hero-title {
+        animation: none;
+    }
+}
+
+/* Fresh-chat composer: the card is the page's focal point, so give it a bit
+   more presence — deeper shadow, roomier padding, two lines of breathing
+   room before it starts growing. */
+.agent-chat-main--empty .agent-composer {
+    padding: 14px 14px 10px;
+    box-shadow: var(--shadow-md);
+}
+
+.agent-chat-main--empty .agent-composer:focus-within {
+    box-shadow: var(--shadow-lg);
+}
+
+.agent-chat-main--empty #agent-app-input {
+    min-height: 44px;
+}
+
+/* ===================================
+   Streaming reveal — word fade, caret,
+   jump-to-bottom pill
+   =================================== */
+
+/* Newly revealed words bloom in (the span is transient — the next reveal
+   tick's morph replaces it with plain text after the animation has run). */
+@keyframes agent-word-in { from { opacity: 0; } to { opacity: 1; } }
+.agent-word-in { animation: agent-word-in 150ms ease-out; }
+
+/* Blinking caret at the live edge of the streaming reply. */
+@keyframes agent-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.agent-bubble-streaming > :last-child::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--color-text);
+    animation: agent-caret-blink 1s step-end infinite;
+}
+
+/* Floating "jump to bottom" pill while streaming with the view scrolled up.
+   Absolute overlay on the chat column (positioned host set in JS), anchored
+   above the messages area's bottom edge — never part of the scrolled
+   content, so it can't render clipped mid-page. */
+.agent-scroll-pill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    z-index: 20;
+    pointer-events: none;
+}
+.agent-scroll-pill button {
+    pointer-events: auto;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+.agent-scroll-pill button:hover { opacity: 0.85; }
+
+/* Runway for the reading-anchored stream: give the in-flight reply room so
+   the question can anchor at the TOP of the viewport immediately (without
+   this, scrollTop clamps — there's nothing below the question yet — and the
+   question sticks mid-view). The streamed text fills this space; the spacer
+   goes away with the wrapper when the reply is finalized. */
+#agent-streaming { min-height: 70vh; }
+
+/* ===================================
+   Per-turn activity group — tool chips
+   fold behind a "N steps" toggle
+   =================================== */
+
+.agent-activity {
+    margin: 4px 0;
+}
+
+.agent-activity-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: -6px;
+    border-radius: var(--radius-sm);
+    user-select: none;
+}
+
+.agent-activity-toggle:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+}
+
+.agent-activity-caret {
+    font-size: 9px;
+    transition: transform var(--transition-fast);
+}
+
+.agent-activity--open .agent-activity-caret {
+    transform: rotate(90deg);
+}
+
+.agent-activity-count:empty {
+    display: none;
+}
+
+/* Folded chips: an indented rail so expanded history reads as a sub-list. */
+.agent-activity-body {
+    margin: 2px 0 2px 4px;
+    padding-left: 12px;
+    border-left: 2px solid var(--color-border-light);
+}
+
+/* The one visible (newest) chip while the turn runs. */
+.agent-activity-latest:empty {
+    display: none;
+}

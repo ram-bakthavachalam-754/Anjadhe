@@ -1,0 +1,105 @@
+/* Plant Tracker — scoped to its own view; design-system variables only. */
+
+#plant-tracker-view .plant-tracker {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+}
+
+#plant-tracker-view .plant-header h1 {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    margin: 0;
+}
+
+#plant-tracker-view .plant-subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    margin: var(--space-xs) 0 var(--space-lg);
+}
+
+#plant-tracker-view .plant-add-form {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+#plant-tracker-view .plant-add-form input {
+    flex: 1;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-base, 1rem);
+}
+
+#plant-tracker-view .plant-add-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#plant-tracker-view .plant-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    transition: box-shadow var(--transition-fast);
+}
+
+#plant-tracker-view .plant-row:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+#plant-tracker-view .plant-name {
+    font-weight: 600;
+    margin-right: var(--space-sm);
+}
+
+#plant-tracker-view .plant-meta {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+#plant-tracker-view .plant-row-actions {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+#plant-tracker-view .plant-water-btn {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: var(--text-sm);
+}
+
+#plant-tracker-view .plant-water-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+#plant-tracker-view .plant-delete-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-lg, 1.25rem);
+    line-height: 1;
+    padding: var(--space-xs);
+}
+
+#plant-tracker-view .plant-empty {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}

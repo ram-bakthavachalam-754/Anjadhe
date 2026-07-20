@@ -1,0 +1,857 @@
+/* ===================================
+   Actions — Today view (phase 1)
+   Minimal Book Theme: monochrome, thin borders, quiet chrome.
+   =================================== */
+
+/* Hub nav (Today · Plan · Goals · Tasks) in the header bar — a bordered
+   pill capsule on a surface fill, matching the Assistant's status capsule. */
+.actions-hub-nav {
+    display: flex;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    padding: 3px;
+}
+
+/* Tab headers are two rows: the Tasks/Plan strip sits on TOP (it is the
+   page-level switch — dead-center, action buttons in its right flank),
+   and the breadcrumb gets the whole row below (no truncation, however
+   deep the trail). */
+.app-header-bar:has(> .actions-hub-nav) {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    /* Fixed strip-row height so tabs without header buttons are exactly
+       as tall as those with them (Plan's + New Focus area). */
+    grid-template-rows: 34px auto;
+    grid-template-areas:
+        "left  strip right"
+        "title title title";
+    align-items: center;
+    row-gap: var(--space-md);
+    /* Breathing room before the two-pane layout below — the breadcrumb
+       needs a clear separation from the content it introduces. */
+    margin-bottom: var(--space-lg);
+}
+
+.app-header-bar:has(> .actions-hub-nav) .app-view-title {
+    grid-area: title;
+}
+
+.app-header-bar > .actions-hub-nav {
+    grid-area: strip;
+    justify-self: center;
+}
+
+/* Header buttons live in the right flank of the strip row — both the
+   wrapped form (.app-header-actions) and bare .primary-btn children
+   (Goals' + New Goal, Tasks' + New Task). */
+.app-header-bar:has(> .actions-hub-nav) > .app-header-actions,
+.app-header-bar:has(> .actions-hub-nav) > .primary-btn {
+    grid-area: right;
+    justify-self: end;
+}
+
+.actions-hub-btn {
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.actions-hub-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.actions-hub-btn.is-active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Header buttons on hub rungs share the strip's pill geometry, so the
+   whole header reads as one aligned control row. */
+.app-header-bar:has(> .actions-hub-nav) .primary-btn,
+.app-header-bar:has(> .actions-hub-nav) .secondary-btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+/* The two-pane layouts (Tasks and Plan) earn a wider frame than the shared
+   single-column cap: nav + gap on top of the 1100px reading width, so the
+   content column is as wide as every other rung's on a big window. */
+#actions-view.app-view,
+#focus-view.app-view {
+    max-width: min(calc(var(--app-content-max) + 188px + var(--space-xl)), 100%);
+}
+
+/* Two-pane layout (Tasks nav + list; Plan reuses it as .focus-layout):
+   sticky sidebar, then a draggable resizer column that owns the divider
+   line (NavResizer drives --actions-nav-width), then the content. */
+.actions-layout {
+    display: flex;
+    align-items: flex-start;
+    /* No flex gap — the resizer column owns the space between panes. */
+    gap: 0;
+    /* Top padding stays minimal — the header grid's row-gap already
+       separates the breadcrumb from the content. */
+    padding: var(--space-xs) 0 var(--space-2xl);
+}
+
+.actions-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.actions-nav {
+    flex: 0 0 var(--actions-nav-width, 188px);
+    width: var(--actions-nav-width, 188px);
+    align-self: flex-start;
+    position: sticky;
+    /* 38px fixed titlebar + breathing room */
+    top: calc(38px + var(--space-md));
+    max-height: calc(100vh - 38px - var(--space-2xl));
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-right: var(--space-sm);
+}
+
+/* Drag handle between nav and content — draws the divider line. */
+.actions-nav-resizer {
+    flex: 0 0 var(--space-lg);
+    align-self: stretch;
+    position: relative;
+    cursor: col-resize;
+    margin-right: var(--space-md);
+}
+
+.actions-nav-resizer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--color-border-light);
+    transition: background var(--transition-fast), width var(--transition-fast);
+}
+
+.actions-nav-resizer:hover::before,
+.actions-nav-resizer.dragging::before {
+    width: 3px;
+    background: var(--color-border-hover);
+}
+
+/* While dragging, keep the resize cursor everywhere and suppress text
+   selection so the pointer doesn't highlight the list. */
+body.nav-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.actions-nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-bottom: var(--space-sm);
+}
+
+.actions-nav-header {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-md) var(--space-sm) var(--space-xs);
+}
+
+/* Group labels inside the Focus areas section — a quieter rung below the
+   uppercase section header. */
+.actions-nav-group {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    padding: var(--space-sm) var(--space-sm) 2px;
+}
+
+.actions-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    padding: 5px var(--space-sm) 5px var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.actions-nav-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.actions-nav-item.is-active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.actions-nav-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions-nav-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.actions-nav-item.is-active .actions-nav-count {
+    color: var(--color-bg);
+    opacity: 0.75;
+}
+
+.actions-nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Drop target while a task row is dragged over — dashed outline reads as
+   tentative, matching the assistant suggestion chips. */
+.actions-nav-item.is-drop {
+    outline: 1.5px dashed var(--color-border-hover);
+    outline-offset: -1.5px;
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Area head line: the area's color dot inside the hero title. */
+.actions-date-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: var(--space-sm);
+}
+
+/* Area view date pills: red once the date has slipped. */
+.actions-row-date.is-late {
+    color: #dc2626;
+}
+
+/* Embedded task detail (Tasks pane and Plan pane): the editor's own
+   breadcrumb is redundant — the page-level breadcrumb above the layout
+   already carries the trail — so only the timer + action buttons remain
+   (right-aligned via the header's existing margin-left:auto). The
+   standalone full-page editor keeps its breadcrumb: there it IS the way
+   back. */
+.actions-task-detail .schedule-editor-header .app-view-title,
+.focus-detail-pane .schedule-editor-header .app-view-title {
+    display: none;
+}
+
+/* Area view: goal section headings — same uppercase rung as other section
+   headers, but a real button (opens the goal in Plan) with a status dot. */
+.actions-goal-heading {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+}
+
+.actions-goal-heading:hover {
+    color: var(--color-text);
+}
+
+.actions-goal-heading .ftree-gdot {
+    margin-right: 2px;
+}
+
+/* Month view footnote (day-based repeats are deliberately not expanded). */
+.actions-range-note {
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.actions-date-line {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+/* The date is the page's hero — large, light serif with tight tracking,
+   mirroring the home greeting and the Assistant's empty-state hero. */
+.actions-date {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.actions-date-summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+/* Quick add — the page's composer. Card treatment like the Assistant's
+   input: soft shadow at rest, deeper when focused. */
+.actions-quick-add-wrap {
+    margin-bottom: var(--space-xl);
+}
+
+#actions-quick-add {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+#actions-quick-add:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+/* Sections */
+.actions-section {
+    margin-bottom: var(--space-xl);
+}
+
+.actions-section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-xs);
+}
+
+.actions-section-overdue {
+    color: #dc2626;
+}
+
+.actions-section-count {
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    margin-left: 2px;
+}
+
+/* Date subgroups inside Overdue. Sentence case, so they read as a rung below
+   the uppercase section headers rather than competing with them. */
+.actions-date-group + .actions-date-group {
+    margin-top: var(--space-md);
+}
+
+.actions-date-heading {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: #dc2626;
+    padding-left: var(--space-md);
+    margin-bottom: 2px;
+}
+
+/* Action rows — soft borderless pills that fill on hover, like the
+   Assistant's conversation rail. Whitespace separates; no hard borders. */
+.actions-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border-radius: var(--radius-md);
+    padding: 9px var(--space-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.actions-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.actions-row.is-done .actions-row-title {
+    text-decoration: line-through;
+    color: var(--color-text-tertiary);
+}
+
+.actions-check-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.actions-check {
+    cursor: pointer;
+}
+
+/* Fixed right-aligned time gutter — one column width for every row (timed,
+   deadline-only, or empty) so titles share a left edge. Overdue rows can
+   carry a date + a time; they wrap inside the column. */
+/* Fixed gutter so every title starts at the same x. It carries a single
+   atom (see _renderRow) and must never wrap — a second line here would make
+   the row taller than its neighbours and break that shared baseline. */
+.actions-row-meta {
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 84px;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    /* Column rule: the fixed gutter draws a subtle separator against the
+       title column, so the list reads as a quiet table. */
+    border-right: 1px solid var(--color-border-light);
+    padding-right: var(--space-sm);
+    align-self: stretch;
+    align-items: center;
+}
+
+.actions-row-title {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions-row-badges {
+    display: flex;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.actions-goal-chip,
+.actions-email-badge {
+    font-size: var(--text-xs);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 1px 10px;
+    color: var(--color-text-secondary);
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Goal names deserve real room — the task title column flexes, so a
+   roomier cap here costs nothing until a goal is actually long. */
+.actions-goal-chip {
+    max-width: 300px;
+}
+
+/* Push-to-today (mirrors the Tasks page): bulk button on the Overdue
+   header, and a per-row chip that reveals on hover. */
+.actions-overdue-pushall {
+    margin-left: auto;
+    padding: 2px var(--space-md);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.actions-overdue-pushall:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.actions-push-today {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 1px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--transition-fast), border-color var(--transition-fast);
+}
+
+.actions-row:hover .actions-push-today { opacity: 1; }
+
+.actions-push-today:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.actions-goal-chip {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.actions-goal-chip:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+/* Assistant filing suggestion chip — dashed border reads as tentative */
+.actions-suggest-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border-hover);
+    border-radius: 999px;
+    padding: 1px 4px 1px 10px;
+    color: var(--color-text-secondary);
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.actions-suggest-act {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.actions-suggest-act:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Completed disclosure */
+.actions-completed-toggle {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-xs) 0;
+    margin-bottom: var(--space-xs);
+}
+
+.actions-completed-toggle:hover {
+    color: var(--color-text);
+}
+
+/* Empty state */
+.actions-empty {
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    padding: var(--space-xl) 0;
+    text-align: center;
+}
+
+/* Events */
+.actions-event-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+}
+
+.actions-event-time {
+    flex-shrink: 0;
+    min-width: 130px;
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    border-right: 1px solid var(--color-border-light);
+    padding-right: var(--space-sm);
+    align-self: stretch;
+}
+
+.actions-event-title {
+    color: var(--color-text);
+}
+
+/* ===================================
+   Weekly Review (guided flow)
+   =================================== */
+
+.actions-review-nudge {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    margin-left: auto;
+    padding: 3px 12px;
+    border-radius: 999px;
+    transition: all var(--transition-fast);
+}
+
+.actions-review-nudge:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* A review is due (>7 days since the last one) — steps up to a bordered
+   pill on the surface fill, still a quiet chip rather than a nag. */
+.actions-review-nudge.is-due {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.review-step-label {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 700;
+}
+
+.review-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.review-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-hover);
+    background: transparent;
+}
+
+.review-dot.is-active {
+    background: var(--color-text);
+    border-color: var(--color-text);
+}
+
+.review-dot.is-done {
+    background: var(--color-border-hover);
+}
+
+.review-lede {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.5;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.review-win-row {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+.review-win-goal {
+    font-size: var(--text-xs);
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    margin-right: 4px;
+}
+
+.review-goal-card,
+.review-item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.review-goal-card {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.review-goal-title {
+    font-weight: 600;
+    font-size: var(--text-sm);
+}
+
+.review-item-title {
+    flex: 1;
+    min-width: 160px;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.review-item-date {
+    font-size: var(--text-xs);
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+.review-verdicts {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.review-verdict {
+    font-size: var(--text-xs);
+    padding: 3px 12px;
+    border-radius: 999px;
+}
+
+.review-bulk {
+    margin-bottom: var(--space-sm);
+}
+
+.review-more {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    padding: var(--space-xs) var(--space-md);
+}
+
+.review-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-xl);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.review-week {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.review-day {
+    flex: 1;
+    text-align: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) 0;
+}
+
+.review-day.is-empty {
+    opacity: 0.45;
+}
+
+.review-day-name {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+}
+
+.review-day-count {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 700;
+}
+
+.review-reflection {
+    font-style: italic;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    border-left: 2px solid var(--color-border-hover);
+    padding-left: var(--space-md);
+    min-height: 1em;
+}
+
+/* Waiting on the model: quiet pulsing note after the deterministic text */
+.review-reflection-wait {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    animation: review-reflect-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes review-reflect-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .actions-layout {
+        flex-direction: column;
+        padding: var(--space-md);
+    }
+    /* Nav becomes a horizontal chip strip; group labels are dropped. */
+    .actions-nav {
+        position: static;
+        max-height: none;
+        width: 100%;
+        flex: none;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--color-border-light);
+        padding: 0 0 var(--space-sm);
+        gap: 2px;
+    }
+    .actions-nav-resizer {
+        display: none;
+    }
+    .actions-nav-section {
+        flex-direction: row;
+        margin-bottom: 0;
+        gap: 2px;
+    }
+    .actions-nav-header,
+    .actions-nav-group {
+        display: none;
+    }
+    .actions-nav-item {
+        width: auto;
+        white-space: nowrap;
+    }
+    .actions-main {
+        width: 100%;
+    }
+    .actions-hub-nav {
+        overflow-x: auto;
+    }
+}
