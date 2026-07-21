@@ -1,0 +1,2377 @@
+/* ===================================
+   Email App
+   =================================== */
+
+/* Layout */
+.email-layout {
+    display: flex;
+    gap: var(--space-xl);
+}
+
+.email-sidebar {
+    width: 200px;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.email-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Header extras */
+.email-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Premium header chrome (matches the Actions rungs / Assistant capsule):
+   header buttons share the pill geometry, the settings gear is a quiet
+   ghost circle. .email-header-actions is also used by the Calendar header,
+   so the gear rule rides on it rather than a per-view id. */
+#email-view .app-header-bar .primary-btn,
+#email-view .app-header-bar .secondary-btn,
+#email-viewer-view .app-header-bar .primary-btn,
+#email-viewer-view .app-header-bar .secondary-btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+.email-header-actions .app-settings-btn {
+    border: none;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+}
+
+.email-header-actions .app-settings-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+.email-sync-status {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-right: var(--space-sm);
+}
+
+/* Label sidebar */
+.email-label-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.email-label-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.email-label-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Active label — surface fill + inset ring, the Assistant rail's active
+   state. */
+.email-label-item.active {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.email-label-insights {
+    margin-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    color: var(--color-text-secondary);
+}
+
+.email-label-name {
+    flex: 1;
+}
+
+.email-label-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.email-label-badge {
+    font-size: 10px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Sidebar section titles — the Assistant rail's micro-label voice, not the
+   legacy serif .sidebar-title (notes.css). */
+.email-sidebar .sidebar-title {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: var(--space-xs);
+}
+
+/* Accounts section */
+.email-accounts-section {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.email-account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xs) 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.email-account-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.email-account-disconnect {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-base);
+    padding: 0 4px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.email-account-item:hover .email-account-disconnect {
+    opacity: 1;
+}
+
+.email-account-disconnect:hover {
+    color: var(--color-text);
+}
+
+.email-accounts-manage-link {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    padding: var(--space-xs) 0;
+    margin-top: var(--space-xs);
+    text-align: left;
+    transition: color var(--transition-fast);
+}
+
+.email-accounts-manage-link:hover {
+    color: var(--color-text);
+}
+
+/* Email list */
+.email-list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Rows — soft borderless pills with a hover fill (like the Assistant's
+   conversation rail); the unread surface fill reads as a filled pill. */
+.email-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 10px var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    min-height: 44px;
+}
+
+.email-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.email-load-more {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-md) var(--space-md) var(--space-lg);
+}
+
+/* Unread state */
+.email-unread {
+    background: var(--color-surface);
+}
+
+.email-unread .email-row-from,
+.email-unread .email-row-subject {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* Star */
+.email-star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-base);
+    color: var(--color-text-tertiary);
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.email-starred .email-star-btn {
+    color: #f5a623;
+}
+
+.email-star-btn:hover {
+    color: #f5a623;
+}
+
+/* Row content */
+.email-row-from {
+    width: 180px;
+    min-width: 120px;
+    flex-shrink: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-row-content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-sm);
+}
+
+.email-row-subject {
+    color: var(--color-text);
+}
+
+.email-row-snippet {
+    color: var(--color-text-tertiary);
+}
+
+.email-row-date {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    min-width: 60px;
+    text-align: right;
+}
+
+/* Connect prompt */
+.email-connect-prompt {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-xl);
+}
+
+.email-connect-prompt h3 {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+.email-connect-prompt p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    font-size: var(--text-sm);
+}
+
+.email-connect-prompt-btn {
+    padding: var(--space-sm) var(--space-xl);
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 999px;
+    font-size: var(--text-base);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.email-connect-prompt-btn:hover {
+    opacity: 0.8;
+}
+
+/* Viewer header — same .app-header-bar as the email home page; just let
+   the breadcrumb ellipsize and the many action buttons wrap. */
+#email-viewer-view .app-header-bar {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+#email-viewer-view .app-view-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#email-viewer-view .app-header-actions {
+    flex-wrap: wrap;
+}
+
+/* Viewer */
+.email-viewer-main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.email-viewer-subject {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: var(--space-lg);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+/* Identity row — avatar · name + address / recipient · date. */
+.email-viewer-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.email-viewer-avatar {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-base);
+    font-weight: 600;
+}
+
+.email-viewer-who {
+    flex: 1;
+    min-width: 0;
+}
+
+.email-viewer-from {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-viewer-from-name {
+    font-weight: 600;
+}
+
+.email-viewer-from-addr {
+    margin-left: 6px;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.email-viewer-to {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-viewer-date {
+    flex: none;
+    align-self: flex-start;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    margin-top: 3px;
+}
+
+/* Attachment chips — pill per file, click to save. */
+.email-viewer-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.email-viewer-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-text);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+    max-width: 100%;
+}
+
+.email-viewer-attachment:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+
+.email-viewer-attachment-icon {
+    color: var(--color-text-tertiary);
+}
+
+.email-viewer-attachment-name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 260px;
+}
+
+.email-viewer-attachment-size {
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+.email-viewer-body {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.email-viewer-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+.email-viewer-body a {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+/* Insights view — full content width, matching the inbox list */
+.email-insights-main {
+    padding: 0 var(--space-xl) var(--space-xl);
+}
+
+/* Empty state */
+.insights-empty {
+    text-align: center;
+    padding: 80px var(--space-xl);
+    color: var(--color-text-tertiary);
+}
+
+.insights-empty-icon {
+    font-size: 32px;
+    margin-bottom: var(--space-md);
+    opacity: 0.3;
+}
+
+.insights-empty h3 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.insights-empty p {
+    font-size: var(--text-sm);
+}
+
+/* Summary strip */
+.insights-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-md);
+}
+
+.insights-summary-strip {
+    display: flex;
+    gap: var(--space-xl);
+    padding: var(--space-lg) 0;
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.insights-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.insights-stat-num {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.insights-stat-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+}
+
+/* Insight cards */
+.insight-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    overflow: hidden;
+    border-left: 3px solid var(--color-border);
+}
+
+.insight-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.insight-card-high { border-left-color: #e74c3c; }
+.insight-card-medium { border-left-color: #f39c12; }
+.insight-card-low { border-left-color: var(--color-border); }
+
+.insight-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14px 16px 0;
+}
+
+.insight-card-sender {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.insight-card-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.insight-card-from {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    line-height: 1.3;
+}
+
+.insight-card-subject {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 360px;
+}
+
+.insight-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.insight-card-priority {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.insight-priority-high { background: #fde8e8; color: #c0392b; }
+.insight-priority-medium { background: #fef3e2; color: #d68910; }
+
+[data-theme="dark"] .insight-priority-high { background: rgba(231, 76, 60, 0.15); color: #f87171; }
+[data-theme="dark"] .insight-priority-medium { background: rgba(243, 156, 18, 0.15); color: #fbbf24; }
+.insight-priority-low { background: var(--color-surface); color: var(--color-text-tertiary); }
+
+.insight-card-time {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+}
+
+.insight-card-summary {
+    padding: 10px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+}
+
+.insight-card-actions {
+    padding: 0 16px 4px;
+}
+
+.insight-action-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid var(--color-border-light, #f0f0f0);
+}
+
+/* Action item synced to a task — the row is a door to the task detail */
+.insight-action-linked {
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.insight-action-linked:hover {
+    background: var(--color-surface-hover);
+}
+
+.insight-action-open {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    white-space: nowrap;
+    padding: 0 6px;
+}
+
+.insight-action-linked:hover .insight-action-open {
+    opacity: 1;
+}
+
+.insight-action-check {
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+.insight-action-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.insight-action-text {
+    font-size: 13px;
+    color: var(--color-text);
+    line-height: 1.4;
+}
+
+.insight-action-due {
+    display: inline-block;
+    font-size: 11px;
+    color: #c0392b;
+    font-weight: 500;
+    margin-left: 6px;
+}
+
+/* Read insight card */
+.insight-card.insight-read {
+    opacity: 0.5;
+}
+
+.insight-card.insight-read:hover {
+    opacity: 0.75;
+}
+
+/* Read section toggle */
+.insights-read-section {
+    margin-top: var(--space-lg, 24px);
+}
+
+.insights-read-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 0;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--color-border, #e0e0e0);
+    cursor: pointer;
+    font-size: var(--text-sm, 14px);
+    color: var(--color-text-tertiary);
+    transition: color 0.15s;
+}
+
+.insights-read-toggle:hover {
+    color: var(--color-text-secondary);
+}
+
+.insights-read-toggle-arrow {
+    font-size: 10px;
+    transition: transform 0.15s;
+}
+
+.insights-read-cards {
+    margin-top: var(--space-sm, 8px);
+}
+
+.insights-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md, 16px);
+    padding: var(--space-md, 16px) 0;
+}
+
+.insights-page-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: var(--text-sm, 13px);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.insights-page-btn:hover:not(:disabled) {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+.insights-page-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.insights-page-info {
+    font-size: var(--text-sm, 13px);
+    color: var(--color-text-tertiary);
+    min-width: 50px;
+    text-align: center;
+}
+
+.insights-all-read {
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm, 14px);
+    padding: var(--space-xl, 32px) 0;
+}
+
+.insight-card-footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--color-border-light, #f0f0f0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.insight-card-open {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    transition: color 0.12s;
+}
+
+.insight-mark-read-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: all 0.12s;
+}
+
+.insight-mark-read-btn:hover {
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-secondary);
+}
+
+.insight-card:hover .insight-card-open {
+    color: var(--color-text);
+}
+
+/* Priority indicators in email rows */
+.email-row-indicators {
+    display: flex;
+    gap: 2px;
+    width: 28px;
+    min-width: 28px;
+    flex-shrink: 0;
+    font-size: 10px;
+}
+
+.email-priority-indicator {
+    color: #e67e22;
+}
+
+.email-action-indicator {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+}
+
+.email-priority-row {
+    border-left: 3px solid #e67e22;
+}
+
+/* Priority label in sidebar */
+.email-label-priority .email-label-name {
+    font-weight: 500;
+}
+
+/* Gear icon next to the "AI Insights" nav item → Insights settings. */
+.email-insights-settings-btn {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-lg);
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    opacity: 0.75;
+    transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+.email-label-insights:hover .email-insights-settings-btn {
+    opacity: 1;
+}
+.email-insights-settings-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* Accounts section on the Email Settings page */
+.email-settings-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-bottom: var(--space-md);
+}
+
+.email-settings-account-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding: 10px var(--space-md);
+    margin: 0 calc(-1 * var(--space-md));
+    border-radius: var(--radius-md);
+}
+
+.email-settings-account-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.email-settings-account-info {
+    min-width: 0;
+}
+
+.email-settings-account-name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-settings-account-email {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Priority settings view */
+.email-priority-main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.priority-settings-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    margin-bottom: var(--space-sm);
+}
+
+.priority-settings-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xl);
+    line-height: 1.6;
+}
+
+.priority-add-form {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: stretch;
+    margin-bottom: var(--space-md);
+}
+
+.priority-add-fields {
+    flex: 1;
+    display: flex;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+}
+
+.priority-add-fields:focus-within {
+    border-color: var(--color-text);
+}
+
+.priority-add-fields .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    min-width: 0;
+}
+
+.priority-add-fields .priority-category-select {
+    border: none;
+    border-left: 1px solid var(--color-border);
+    border-radius: 0;
+    background: var(--color-surface);
+    padding: 6px 10px;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    /* Reset the global form-control width:100% (components.css) — otherwise the
+       non-shrinking select claims the whole row and collapses the text input
+       beside it to a sliver. Size to its content instead. */
+    width: auto;
+    flex: 0 0 auto;
+}
+
+.priority-add-form .primary-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.priority-auto-row {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.priority-auto-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+}
+
+/* Followed / muted senders — clean contact-style list */
+.priority-terms-list {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.sender-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background var(--transition-fast);
+}
+
+.sender-row:last-child {
+    border-bottom: none;
+}
+
+.sender-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.sender-avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.sender-row-name {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sender-row-count {
+    flex-shrink: 0;
+    min-width: 1.75em;
+    text-align: center;
+    padding: 1px var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+}
+
+.priority-term-category-select {
+    flex-shrink: 0;
+    width: auto;
+    max-width: 130px;
+    padding: 3px var(--space-sm);
+    font-size: var(--text-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+}
+
+.priority-term-category-select:hover {
+    border-color: var(--color-border-hover);
+}
+
+.priority-term-delete {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-lg);
+    padding: 0 var(--space-xs);
+    line-height: 1;
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.sender-row:hover .priority-term-delete {
+    opacity: 1;
+}
+
+.priority-term-delete:hover {
+    color: var(--color-text);
+}
+
+.priority-empty {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    padding: var(--space-lg);
+    text-align: center;
+}
+
+/* Per-email AI analysis section */
+.email-analysis {
+    margin-bottom: var(--space-xl);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.analysis-priority-high {
+    border-left: 3px solid #e74c3c;
+}
+
+.analysis-priority-medium {
+    border-left: 3px solid #f39c12;
+}
+
+.analysis-priority-low {
+    border-left: 3px solid #27ae60;
+}
+
+.analysis-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.analysis-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.analysis-priority-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.analysis-timestamp {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-left: auto;
+}
+
+.analysis-summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+    line-height: 1.5;
+}
+
+.analysis-section {
+    margin-bottom: var(--space-md);
+}
+
+.analysis-section:last-child {
+    margin-bottom: 0;
+}
+
+.analysis-section-title {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.analysis-action-list {
+    list-style: none;
+    padding: 0;
+}
+
+.analysis-action-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-xs) 0;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.analysis-action-item:last-child {
+    border-bottom: none;
+}
+
+.analysis-action-text {
+    flex: 1;
+}
+
+.analysis-due-date {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: #e74c3c;
+    font-weight: 500;
+    padding: 1px 6px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 3px;
+}
+
+.analysis-insights-list {
+    padding-left: var(--space-lg);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.analysis-insights-list li {
+    margin-bottom: var(--space-xs);
+    line-height: 1.5;
+}
+
+/* Responsive */
+/* ========================
+   Compose View
+   ======================== */
+
+#email-compose-view {
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.compose-chrome {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 32px 0;
+}
+
+/* Toolbar */
+.compose-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.compose-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.compose-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.compose-discard-btn:hover {
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+}
+
+.compose-save-indicator {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+    min-width: 80px;
+    transition: opacity var(--transition-fast);
+}
+
+.compose-save-indicator.is-error {
+    color: #dc2626;
+}
+
+/* Attachment chips row */
+.compose-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.compose-attachment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px 4px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    max-width: 280px;
+}
+
+.compose-attachment-chip.is-loading {
+    opacity: 0.55;
+}
+
+.compose-attachment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+
+.compose-attachment-size {
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.compose-attachment-remove {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 14px;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+}
+
+.compose-attachment-remove:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.email-drafts-placeholder {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    font-family: var(--font-sans);
+}
+
+.compose-toolbar-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.15s;
+}
+
+.compose-toolbar-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.compose-ai-toggle {
+    color: var(--color-text-secondary);
+}
+
+.compose-ai-toggle:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.compose-send-btn {
+    background: var(--color-text);
+    color: var(--color-bg, #fff);
+    border: none;
+    padding: 7px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.compose-send-btn:hover {
+    opacity: 0.85;
+}
+
+.compose-send-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Editor area */
+.compose-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Field rows */
+.compose-field {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    min-height: 40px;
+    border-bottom: 1px solid var(--color-border-light, #f0f0f0);
+}
+
+.compose-label {
+    width: 48px;
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.compose-input {
+    flex: 1;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: none !important;
+    padding: 8px 0;
+    margin: 0;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
+.compose-input::placeholder {
+    color: var(--color-text-tertiary);
+    opacity: 0.6;
+}
+
+select.compose-input {
+    cursor: pointer;
+}
+
+.compose-field-extras {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.compose-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.12s;
+}
+
+.compose-toggle-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+/* Subject field — no label, larger text */
+.compose-field-subject {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.compose-subject-input {
+    font-size: 18px !important;
+    font-weight: 500;
+    padding: 10px 0 !important;
+}
+
+.compose-subject-input::placeholder {
+    font-weight: 400;
+    opacity: 0.4;
+}
+
+/* Body area */
+.compose-body-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 0;
+    min-height: 0;
+}
+
+.compose-body {
+    width: 100%;
+    min-height: 300px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.compose-body[contenteditable="true"]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Quoted block rendered by the reply/forward bootstrap HTML. Scoped to the
+   compose body so we can style it consistently without fighting whatever
+   inline styles the original email brought in. */
+.compose-body .gmail_attribution {
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+    margin: 18px 0 6px;
+}
+
+.compose-body blockquote.gmail_quote,
+.compose-body blockquote {
+    margin: 0 0 0 0.4ex;
+    border-left: 2px solid var(--color-border);
+    padding-left: 12px;
+    color: var(--color-text-secondary);
+}
+
+.compose-body img { max-width: 100%; height: auto; }
+.compose-body table { max-width: 100%; }
+
+/* Formatting toolbar */
+.compose-format-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0 10px;
+    border-bottom: 1px solid var(--color-border-light);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* Ghost circles, like the app's other quiet icon buttons. */
+.compose-format-btn {
+    background: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    line-height: 1;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.compose-format-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.compose-format-btn:active {
+    background: var(--color-surface);
+}
+
+.compose-format-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--color-border);
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* ========================
+   AI Assist Panel
+   ======================== */
+
+.compose-ai-panel {
+    flex-shrink: 0;
+    border-top: 1px solid var(--color-border);
+    padding: 16px 0;
+}
+
+.compose-ai-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.compose-ai-action-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: var(--font-sans);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.compose-ai-action-btn:hover {
+    border-color: var(--color-text-tertiary);
+    color: var(--color-text);
+}
+
+.compose-ai-action-btn.loading {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.compose-ai-result {
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    padding: 14px;
+    background: var(--color-surface);
+    border-radius: 8px;
+    margin: 12px 0 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    color: var(--color-text);
+}
+
+.compose-ai-accept-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Autocomplete dropdown */
+.compose-autocomplete {
+    display: none;
+    position: fixed;
+    background: var(--color-bg, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    z-index: 9999;
+    max-height: 240px;
+    overflow-y: auto;
+    min-width: 280px;
+}
+
+.compose-ac-item {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.compose-ac-item:hover,
+.compose-ac-item.active {
+    background: var(--color-surface);
+}
+
+@media (max-width: 768px) {
+    .email-layout {
+        flex-direction: column;
+    }
+
+    .email-sidebar {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .email-row-from {
+        width: 100px;
+        min-width: 80px;
+    }
+}
+
+/* Search history suggestions */
+/* Search — a quiet pill on the surface fill (same voice as Tasks/Goals). */
+.email-search-wrap .search-input {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+.email-search-wrap .search-input:focus {
+    background: var(--color-bg);
+    border-color: var(--color-border-hover);
+    box-shadow: none;
+}
+
+.email-search-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 20;
+}
+
+.search-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 6px var(--space-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+}
+
+.search-suggestion-item:hover,
+.search-suggestion-item.active {
+    background: var(--color-surface-hover);
+}
+
+.search-suggestion-icon {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-base);
+    flex-shrink: 0;
+}
+
+.search-suggestion-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-suggestion-remove {
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: var(--text-base);
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.search-suggestion-remove:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* --- AI Insights settings + typed insights --- */
+
+.insight-settings-section {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--color-border-light);
+}
+.insight-settings-section:last-child {
+    border-bottom: none;
+}
+
+.insight-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.insight-type-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.insight-type-toggle:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+.insight-type-toggle.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.insight-type-toggle input {
+    flex-shrink: 0;
+}
+
+/* Type chip on insight cards and the viewer analysis panel. Monochrome to
+   match the Minimal Book theme — differentiation is by label, not color. */
+.insight-type-chip {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 1px var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* Feedback / follow / mute row */
+.insight-feedback-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+    flex-wrap: wrap;
+}
+/* Inside an insight card the surrounding sections are padded 16px and the
+   row sits just above the footer — match that inset and add bottom breathing
+   room so the buttons aren't flush against the card edges. */
+.insight-card .insight-feedback-row {
+    margin-top: 0;
+    padding: var(--space-sm) 16px var(--space-sm);
+}
+.insight-fb-spacer {
+    flex: 1;
+}
+.insight-fb-btn {
+    font-size: var(--text-xs);
+    padding: 3px var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.insight-fb-btn:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+.insight-fb-btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+/* The chosen vote stays emphasized (inverted) even while the pair is locked. */
+.insight-fb-vote.is-selected {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+    opacity: 1;
+}
+/* Sender controls are secondary to the thumbs — quieter, link-like. */
+.insight-fb-manage {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text-tertiary);
+}
+.insight-fb-followed {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+/* "Add task" is the primary action on the row — filled to stand out from the
+   quieter feedback/sender controls. */
+.insight-fb-addtask {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.insight-fb-addtask:hover {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+    opacity: 0.85;
+}
+/* Quiet confirmation once a task exists for this email. */
+.insight-fb-added {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+.muted-sender-remove {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-lg);
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 var(--space-xs);
+}
+.muted-sender-remove:hover {
+    color: var(--color-text);
+}
+
+/* Per-row hover actions (Mark read / Bundle): readable text chips that
+   overlay the date on hover — no reserved width, no layout shift. */
+.email-row {
+    position: relative;
+}
+
+.email-row-actions {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    /* Matches the row's hover background so the covered date disappears
+       cleanly instead of bleeding through. */
+    background: var(--color-surface-hover);
+    padding-left: var(--space-sm);
+    transition: opacity var(--transition-fast);
+}
+
+.email-row:hover .email-row-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.email-read-btn,
+.email-bundle-move-btn {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    line-height: 1;
+    padding: 6px 10px;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.email-read-btn:hover,
+.email-bundle-move-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===================================
+   Compact insight rows
+   =================================== */
+
+.insight-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    margin-bottom: 6px;
+    overflow: hidden;
+    transition: box-shadow var(--transition-fast);
+}
+
+.insight-item.is-expanded {
+    box-shadow: var(--shadow-sm);
+}
+
+.insight-item.insight-read {
+    /* Read insights stay full-strength; the lighter sender name below is the
+       only read/unread cue, matching the Inbox's weight-based distinction. */
+    background: var(--color-surface);
+}
+
+.insight-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 8px 12px;
+    min-height: 40px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.insight-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.insight-row-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.insight-dot-high { background: #dc2626; }
+.insight-dot-medium { background: #d97706; }
+.insight-dot-low { background: var(--color-border-hover); }
+
+.insight-row-from {
+    flex: 0 1 auto;
+    max-width: 150px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.insight-read .insight-row-from {
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+.insight-row-summary {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.insight-row-badge {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+}
+
+.insight-row-meta {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.insight-row-time {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    min-width: 40px;
+    text-align: right;
+}
+
+.insight-row .insight-mark-read-btn {
+    flex-shrink: 0;
+    opacity: 0;
+    white-space: nowrap;
+}
+
+.insight-row:hover .insight-mark-read-btn {
+    opacity: 1;
+}
+
+.insight-row-detail {
+    padding: 4px 14px 12px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.insight-detail-subject {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 10px 0 2px;
+}
+
+.insight-detail-summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+
+.insight-detail-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+}
+
+.insight-open-email {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    padding: 2px 4px;
+}
+
+.insight-open-email:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+}
+
+/* ===================================
+   Bundles (Inbox-style topic rows)
+   =================================== */
+
+.email-bundle-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 10px var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    min-height: 44px;
+}
+
+.email-bundle-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.email-bundle-icon {
+    width: 20px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+}
+
+.email-bundle-name {
+    width: 208px;
+    min-width: 148px;
+    flex-shrink: 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.email-bundle-unread {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 0 6px;
+    border-radius: 999px;
+}
+
+.email-bundle-preview {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Hover text-chip actions for bundle rows — same overlay pattern as
+   .email-row-actions on email rows. */
+.email-bundle-row {
+    position: relative;
+}
+
+.email-bundle-actions {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--color-surface-hover);
+    padding-left: var(--space-sm);
+    transition: opacity var(--transition-fast);
+}
+
+.email-bundle-row:hover .email-bundle-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.email-bundle-act {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    line-height: 1;
+    padding: 6px 10px;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.email-bundle-act:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Expanded bundle: children indented with a left rail, like Inbox */
+.email-bundle.is-expanded {
+    background: var(--color-surface);
+}
+
+.email-bundle-emails {
+    border-left: 2px solid var(--color-border-hover);
+    margin-left: var(--space-md);
+}
+
+.email-bundle-emails .email-row {
+    padding-left: var(--space-md);
+}
+
+/* Gear in the inbox toolbar (reuses the insights gear look, always visible) */
+.app-toolbar .email-insights-settings-btn {
+    align-self: center;
+    opacity: 1;
+}
+
+/* Unread/All segmented toggle — pill capsule like the Actions hub strip. */
+.email-read-filter {
+    display: flex;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    padding: 3px;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+.email-filter-btn {
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.email-filter-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.email-filter-btn.is-active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* ===================================
+   Move-to-bundle picker (modal)
+   =================================== */
+
+.bundle-picker-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: var(--space-md);
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.bundle-picker-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-sm);
+}
+
+.bundle-picker-option:hover {
+    background: var(--color-surface-hover);
+}
+
+.bundle-picker-sender {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.bundle-picker-sender strong {
+    color: var(--color-text);
+    word-break: break-all;
+}
+
+/* ===================================
+   Bundle settings (Email Settings view)
+   =================================== */
+
+.bundle-def-toggle {
+    position: relative;
+}
+
+.bundle-rules-search {
+    max-width: 340px;
+    margin-bottom: var(--space-sm);
+}
+
+/* Name | description split in the add-bundle form (desc gets the room) */
+.priority-add-fields #email-bundle-name {
+    flex: 0 0 38%;
+    border-right: 1px solid var(--color-border);
+}
+
+.bundle-def-delete {
+    margin-left: auto;
+}
+
+.bundle-rule-target {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+.bundle-reclassify-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.bundle-reclassify-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}

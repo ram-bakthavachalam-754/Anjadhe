@@ -1,0 +1,1126 @@
+/* ===================================
+   Journal App - Minimal Book Theme
+   Three-pane layout (2026-07-20): filters | timeline | the entry,
+   always open and always editable. Mirrors the Notes redesign.
+   =================================== */
+
+/* Premium header chrome (matches the Actions rungs / Assistant capsule). */
+#journal-view .app-header-bar .primary-btn,
+#journal-view .app-header-bar .secondary-btn,
+#journal-editor-view .editor-actions .primary-btn,
+#journal-editor-view .editor-actions .secondary-btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+/* ── Three-pane frame ── */
+
+#journal-view.app-view {
+    max-width: min(1560px, 100%);
+}
+
+/* App-height frame (wide windows): the page never scrolls — each pane
+   owns its scroll. Narrow windows fall back to stacked page scroll. */
+@media (min-width: 981px) {
+    #journal-view.view.active {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 38px);
+        overflow: hidden;
+    }
+
+    #journal-view .app-header-bar {
+        flex-shrink: 0;
+    }
+
+    #journal-view .journal-layout {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: var(--space-xs) 0 0;
+    }
+
+    #journal-view .journal-sidebar,
+    #journal-view .journal-list-col {
+        height: 100%;
+        max-height: 100%;
+    }
+
+    .journal-entry-pane {
+        height: 100%;
+        max-height: 100%;
+        overflow-y: auto;
+        padding-bottom: var(--space-xl);
+    }
+}
+
+.journal-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    padding: var(--space-xs) 0 var(--space-2xl);
+}
+
+.journal-sidebar {
+    flex: 0 0 var(--journal-nav-width, 188px);
+    width: var(--journal-nav-width, 188px);
+    align-self: stretch;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding-right: var(--space-sm);
+}
+
+/* Drag handles — same hairline voice as Notes/Actions. body.nav-resizing
+   (actions.css) covers the cursor lock while dragging. */
+.journal-nav-resizer {
+    flex: 0 0 var(--space-lg);
+    align-self: stretch;
+    position: relative;
+    cursor: col-resize;
+    margin-right: var(--space-md);
+}
+
+.journal-nav-resizer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--color-border-light);
+    transition: background var(--transition-fast), width var(--transition-fast);
+}
+
+.journal-nav-resizer:hover::before,
+.journal-nav-resizer.dragging::before {
+    width: 3px;
+    background: var(--color-border-hover);
+}
+
+/* Middle column: search + capture + timeline. */
+.journal-list-col {
+    flex: 0 0 var(--journal-list-width, 300px);
+    width: var(--journal-list-width, 300px);
+    align-self: stretch;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-right: var(--space-xs);
+}
+
+.journal-list-toolbar {
+    display: flex;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.journal-list-toolbar .search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+}
+
+.journal-list-toolbar .search-input:focus {
+    background: var(--color-bg);
+    border-color: var(--color-border-hover);
+    box-shadow: none;
+}
+
+/* Quick capture — dashed "new thing goes here" voice; flex:none guards
+   against the global .search-input flex:1 inside the fixed column. */
+.journal-capture {
+    flex: none;
+    width: 100%;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px dashed var(--color-border);
+    background: transparent;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+}
+
+.journal-capture:focus {
+    outline: none;
+    border-style: solid;
+    border-color: var(--color-border-hover);
+    background: var(--color-bg);
+    box-shadow: none;
+}
+
+/* Right pane: the always-editable entry. */
+.journal-entry-pane {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* [hidden] must beat any layout display (hidden-attribute trap). */
+#journal-editor-view[hidden],
+#journal-entry-empty[hidden] {
+    display: none;
+}
+
+/* No-selection state — quiet hero. */
+.journal-entry-empty {
+    padding: var(--space-2xl) var(--space-xl);
+    text-align: center;
+}
+
+.journal-entry-empty-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--color-text-tertiary);
+    margin: 0 0 var(--space-xs);
+}
+
+.journal-entry-empty-hint {
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    margin: 0;
+}
+
+/* Maximize (the ⛶ button): the nav + timeline columns give way. */
+#journal-view.journal-maximized .journal-sidebar,
+#journal-view.journal-maximized .journal-nav-resizer,
+#journal-view.journal-maximized .journal-list-col,
+#journal-view.journal-maximized .journal-list-resizer {
+    display: none;
+}
+
+/* ── Sidebar — Actions nav voice ── */
+
+.journal-sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-bottom: var(--space-sm);
+}
+
+.journal-sidebar-title {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-md) var(--space-sm) var(--space-xs);
+}
+
+.journal-sidebar-section:first-child .journal-sidebar-title {
+    padding-top: 0;
+}
+
+.journal-filter-list,
+.journal-mood-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.journal-filter-item,
+.journal-mood-filter-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 5px var(--space-sm) 5px var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.journal-filter-item:hover,
+.journal-mood-filter-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Active filter — inverted fill, same as the Actions nav. */
+.journal-filter-item.active,
+.journal-mood-filter-item.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.journal-filter-name,
+.journal-mood-filter-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.journal-filter-count,
+.journal-mood-filter-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.journal-filter-item.active .journal-filter-count,
+.journal-mood-filter-item.active .journal-mood-filter-count {
+    color: var(--color-bg);
+    opacity: 0.75;
+}
+
+.journal-mood-filter-icon {
+    font-size: var(--text-sm);
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Tag cloud */
+.journal-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding: 0 var(--space-sm);
+}
+
+.journal-tag-cloud-item {
+    font-size: var(--text-xs);
+    padding: 2px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.journal-tag-cloud-item:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.journal-tag-cloud-item.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.journal-tag-cloud-empty {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    padding: 0 var(--space-sm);
+}
+
+/* Stats */
+.journal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-xs) var(--space-sm) 0;
+}
+
+.journal-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-stat-value {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.journal-stat-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+}
+
+/* ── Timeline (list column) ── */
+
+.journal-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-month-group {
+    margin-bottom: var(--space-lg);
+}
+
+.journal-month-header {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-sm) var(--space-sm) var(--space-xs);
+}
+
+/* Soft borderless rows with a hover fill. */
+.journal-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: 6px var(--space-sm) 7px;
+    border-radius: var(--radius-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    min-width: 0;
+}
+
+.journal-entry:hover {
+    background: var(--color-surface-hover);
+}
+
+/* Selected entry — surface fill + inset ring (Assistant rail state). */
+.journal-entry.is-selected {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Keyboard cursor from the search box. */
+.journal-entry.is-cursor {
+    outline: 1.5px dashed var(--color-border-hover);
+    outline-offset: -1.5px;
+    background: var(--color-surface-hover);
+}
+
+/* Date column */
+.journal-entry-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 34px;
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+
+.journal-day {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-text);
+}
+
+.journal-weekday {
+    font-size: 9px;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* Content column */
+.journal-entry-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.journal-entry-topline {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.journal-entry-mood {
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+
+.journal-entry-preview {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.journal-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: 3px;
+}
+
+.journal-entry-tags {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.journal-tag {
+    font-size: 10px;
+    padding: 1px 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-tertiary);
+}
+
+/* Media thumb — small photo square on rows whose entry carries media. */
+.journal-entry-thumb {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--color-border-light);
+    margin-top: 1px;
+}
+
+.journal-entry-media-mark {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+/* ── Empty state (list column) ── */
+
+.journal-empty-state {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md);
+    color: var(--color-text-tertiary);
+    display: none;
+}
+
+.journal-empty-state h3 {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.journal-empty-state p {
+    font-size: var(--text-sm);
+    font-style: italic;
+}
+
+/* ===================================
+   The entry pane (always-editable)
+   =================================== */
+
+/* Slim right-aligned quiet action row — no page title; the date chip in
+   the meta strip is the entry's identity. */
+#journal-editor-view .editor-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+#journal-editor-view .editor-actions {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+#journal-editor-view .editor-actions .secondary-btn {
+    font-size: var(--text-xs);
+    padding: 4px 12px;
+    color: var(--color-text-secondary);
+}
+
+#journal-editor-view .editor-actions .secondary-btn:hover {
+    color: var(--color-text);
+}
+
+/* Base tag pill (used inside the tags strip). */
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+}
+
+.tag-remove {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 0;
+    font-size: var(--text-base);
+    line-height: 1;
+}
+
+.tag-remove:hover {
+    color: var(--color-text);
+}
+
+/* Base mood option (popover overrides some of this). */
+.mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mood-option:hover {
+    background: var(--color-surface);
+}
+
+.mood-option.selected {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.mood-option-icon {
+    font-size: var(--text-2xl);
+}
+
+.mood-option-label {
+    font-size: var(--text-xs);
+}
+
+.journal-focus-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.journal-focus-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.journal-editor-main {
+    max-width: 760px;
+    margin: 0 auto;
+    /* Top padding gives breathing room between the editor header's
+       bottom border and the meta strip; the parent .app-view already
+       pads horizontally, so left/right stay 0. */
+    padding-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ── Quiet metadata strip ── */
+
+.journal-meta-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    flex-wrap: wrap;
+    row-gap: var(--space-xs);
+}
+
+.journal-meta-sep {
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Buttons in the meta strip (date, mood) — get a subtle chip background
+   so they're visually distinguishable from inert labels (word count,
+   save indicator). Hover deepens the contrast. */
+.journal-meta-date-trigger {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.journal-meta-date-trigger:hover,
+.journal-meta-date-trigger:focus {
+    outline: none;
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+/* The native input stays in the DOM (so showPicker() / change events work
+   through it) but is visually hidden. We position it offscreen rather
+   than display:none so the picker can still anchor against it. */
+.journal-meta-date-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.journal-meta-mood {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.journal-meta-mood:hover,
+.journal-meta-mood[aria-expanded="true"] {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.journal-meta-mood .journal-mood-icon { font-size: var(--text-base); line-height: 1; }
+.journal-meta-mood .journal-mood-label { font-size: var(--text-sm); }
+
+/* Static labels (word count) — visually quieter than the buttons above. */
+.journal-meta-count {
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 3px 0;  /* match button vertical metric so baselines align */
+}
+
+/* Save indicator — icon + text, more legible than a bare dot. The icon
+   is a flex container so the inner shape (a ::before) can be precisely
+   centered without absolute positioning, which fixes the misalignment
+   that showed up when the parent had different line-height than the
+   icon box. */
+.journal-save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    line-height: 1;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 3px 0;
+    transition: color var(--transition-fast);
+}
+
+.journal-save-icon {
+    width: 12px;
+    height: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* SAVED — green-tinted check, signals "all good". */
+.journal-save-indicator[data-state="saved"] {
+    color: #16a34a;  /* semantic success — only colored ink in the strip */
+}
+.journal-save-indicator[data-state="saved"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 5px;
+    height: 9px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+/* SAVING — spinning ring, slightly more emphasis than saved. */
+.journal-save-indicator[data-state="saving"] {
+    color: var(--color-text-secondary);
+}
+.journal-save-indicator[data-state="saving"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border);
+    border-top-color: currentColor;
+    animation: journal-save-spin 0.7s linear infinite;
+}
+
+/* UNSAVED — amber dot, signals "needs attention". */
+.journal-save-indicator[data-state="unsaved"] {
+    color: #d97706;
+}
+.journal-save-indicator[data-state="unsaved"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+@keyframes journal-save-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── The writing surface ── */
+
+.journal-content-editor {
+    flex: 1;
+    min-height: 60vh;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 0.9375rem;       /* kept in sync with Notes (.note-content-editor) */
+    /* Inter for the writing surface — reads cleaner than the serif at
+       paragraph length and pairs well with the serif headings. */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.75;
+    letter-spacing: -0.003em;
+    outline: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';  /* Inter's stylistic alts for cleaner letterforms */
+}
+
+.journal-content-editor:focus { outline: none; }
+
+/* Placeholder via data-placeholder so it survives sanitization etc.
+   `:empty` gets brittle once any rich block exists; we instead pair the
+   placeholder with `.is-empty` toggled from JS. The plain :empty rule
+   handles the default first-load case. */
+.journal-content-editor:empty:before {
+    content: attr(data-placeholder);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+    font-style: italic;
+}
+
+/* Block typography inside the editor — Inter throughout for cohesion;
+   weight + size do the work that a font swap used to. */
+.journal-content-editor h1,
+.journal-content-editor h2,
+.journal-content-editor h3 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: var(--space-xl) 0 var(--space-sm);
+}
+
+.journal-content-editor h1 { font-size: 1.875rem; }
+.journal-content-editor h2 { font-size: 1.5rem; }
+.journal-content-editor h3 { font-size: 1.25rem; }
+
+.journal-content-editor p {
+    margin: 0 0 var(--space-md);
+}
+
+.journal-content-editor ul,
+.journal-content-editor ol {
+    margin: var(--space-md) 0;
+    padding-left: 1.5rem;
+}
+
+.journal-content-editor li {
+    margin: 4px 0;
+}
+
+.journal-content-editor a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+.journal-content-editor a:hover { opacity: 0.7; }
+
+.journal-content-editor blockquote {
+    margin: var(--space-md) 0;
+    padding: 4px 0 4px var(--space-md);
+    border-left: 2px solid var(--color-text-tertiary);
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.journal-content-editor pre,
+.journal-content-editor code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    background: var(--color-surface);
+    border-radius: 4px;
+}
+
+.journal-content-editor code { padding: 1px 5px; }
+
+.journal-content-editor pre {
+    padding: var(--space-sm) var(--space-md);
+    margin: var(--space-md) 0;
+    overflow-x: auto;
+    line-height: 1.5;
+}
+
+.journal-content-editor hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-xl) 0;
+}
+
+/* ── Tags pill row ── */
+
+.journal-tags-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.journal-tag-input {
+    border: 1px solid var(--color-border);
+    outline: none;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    padding: 3px 10px;
+    min-width: 140px;
+    border-radius: 999px;
+}
+
+.journal-tag-input:focus {
+    border-color: var(--color-border-hover);
+}
+
+.journal-tag-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.journal-tag-add-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.journal-tag-add-btn:hover {
+    color: var(--color-text-secondary);
+    border-color: var(--color-border-hover);
+}
+
+/* The pill rendered for each tag (re-uses the journal-tag class from
+   the viewer) gets a tiny remove button via JS. We re-style the legacy
+   .tag-item / .tag-remove to fit the new compact strip. */
+.journal-tags-strip .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px 2px 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.journal-tags-strip .tag-remove {
+    background: transparent;
+    border: 0;
+    padding: 0 4px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    border-radius: 50%;
+}
+
+.journal-tags-strip .tag-remove:hover { color: var(--color-text); }
+
+/* ── Mood popover ── */
+
+.journal-mood-popover {
+    position: fixed;
+    z-index: 200;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 6px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+}
+
+.journal-mood-popover[hidden] { display: none; }
+
+.journal-mood-popover .mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-sm);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+    min-width: 64px;
+}
+
+.journal-mood-popover .mood-option:hover { background: var(--color-surface); }
+.journal-mood-popover .mood-option.selected {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.journal-mood-popover .mood-option-icon { font-size: var(--text-xl); line-height: 1; }
+.journal-mood-popover .mood-option-label { font-size: var(--text-xs); color: var(--color-text-secondary); }
+
+/* ── Media in entries ── */
+
+.journal-content-editor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: var(--space-sm) 0;
+    display: block;
+}
+
+.journal-content-editor video {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    margin: var(--space-sm) 0;
+    display: block;
+    background: var(--color-surface);
+}
+
+/* Media whose bytes haven't arrived on this Mac yet (sync in flight)
+   — JS tags them so they read as pending, not broken. */
+.journal-content-editor [data-media].is-media-missing {
+    min-height: 80px;
+    min-width: 160px;
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+
+/* Mid-width: stack the timeline above the entry. */
+@media (max-width: 980px) {
+    .journal-layout {
+        flex-wrap: wrap;
+    }
+
+    .journal-list-col {
+        max-height: 40vh;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .journal-list-resizer {
+        display: none;
+    }
+
+    .journal-entry-pane {
+        flex-basis: 100%;
+        margin-top: var(--space-lg);
+    }
+}
+
+/* Narrow: the sidebar becomes a horizontal chip strip. */
+@media (max-width: 640px) {
+    .journal-layout {
+        flex-direction: column;
+    }
+
+    .journal-sidebar {
+        max-height: none;
+        width: 100%;
+        flex: none;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--color-border-light);
+        padding: 0 0 var(--space-sm);
+        gap: 2px;
+    }
+
+    .journal-nav-resizer {
+        display: none;
+    }
+
+    .journal-sidebar-section {
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 0;
+        gap: 2px;
+    }
+
+    .journal-sidebar-title,
+    .journal-stats-section {
+        display: none;
+    }
+
+    .journal-filter-list,
+    .journal-mood-filter-list {
+        flex-direction: row;
+        gap: 2px;
+    }
+
+    .journal-filter-item,
+    .journal-mood-filter-item {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .journal-list-col {
+        width: 100%;
+        flex: none;
+    }
+
+    .journal-entry-pane {
+        margin-top: var(--space-md);
+    }
+}

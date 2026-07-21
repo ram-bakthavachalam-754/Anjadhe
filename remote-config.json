@@ -1,0 +1,76 @@
+{
+  "configVersion": 1,
+  "lastUpdated": "2026-07-21",
+  "llamacppInstall": {
+    "macArm64Url": "https://github.com/ggml-org/llama.cpp/releases/download/b10015/llama-b10015-bin-macos-arm64.tar.gz",
+    "macArm64Sha256": "8d3144eb71a4b9b5b9ed50512f659d1cbcd5772e30aca75e6f9a0d7d68c311a7",
+    "macX64Url": "https://github.com/ggml-org/llama.cpp/releases/download/b10015/llama-b10015-bin-macos-x64.tar.gz",
+    "macX64Sha256": "295a51dad3feafaafed8aa8fba9d9429fcaca8a2e7e66c73d839076fdf3fec6f",
+    "manualPage": "https://github.com/ggml-org/llama.cpp/releases",
+    "_sha256Note": "Pins MUST match the URLs above. When bumping the llama.cpp build (bNNNNN), recompute: curl -sL <url> | shasum -a 256. A mismatch aborts the install (SECURITY-AUDIT.md M4)."
+  },
+  "models": [
+    {
+      "name": "qwen3.5:9b",
+      "desc": "Alibaba Qwen3.5 9B: strong tool calling and reasoning for its size, 256K context",
+      "size": "5.7 GB",
+      "minRam": 16,
+      "license": "Apache 2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "gguf": {
+        "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/Qwen3.5-9B-Q4_K_M.gguf",
+        "file": "Qwen3.5-9B-Q4_K_M.gguf",
+        "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8"
+      },
+      "default": true
+    },
+    {
+      "name": "gemma4:12b-it-qat",
+      "desc": "Google Gemma 4 12B QAT: 4-bit quantization-aware trained (near full-precision quality), 256K context",
+      "size": "7.2 GB",
+      "minRam": 16,
+      "license": "Gemma Terms of Use",
+      "licenseUrl": "https://ai.google.dev/gemma/terms",
+      "gguf": {
+        "url": "https://huggingface.co/google/gemma-4-12B-it-qat-q4_0-gguf/resolve/main/gemma-4-12b-it-qat-q4_0.gguf",
+        "file": "gemma-4-12b-it-qat-q4_0.gguf",
+        "sha256": ""
+      }
+    },
+    {
+      "name": "gemma4:e4b-it-qat",
+      "desc": "Google Gemma 4 E4B QAT: the middle Gemma — noticeably more capable than E2B, faster and lighter than 12B",
+      "size": "5.2 GB",
+      "minRam": 16,
+      "license": "Gemma Terms of Use",
+      "licenseUrl": "https://ai.google.dev/gemma/terms",
+      "gguf": {
+        "url": "https://huggingface.co/google/gemma-4-E4B-it-qat-q4_0-gguf/resolve/main/gemma-4-E4B_q4_0-it.gguf",
+        "file": "gemma-4-E4B_q4_0-it.gguf",
+        "sha256": "676c35070db6dbe52f93e9c864ee0fba4eddea94b9c875d9cb10daff453fbaee"
+      }
+    },
+    {
+      "name": "gemma4:e2b-it-qat",
+      "desc": "Google Gemma 4 E2B QAT: the light option for 8 GB Macs — quick chats, summaries, and email insights; the full assistant works best on the 12B model",
+      "size": "3.4 GB",
+      "minRam": 8,
+      "gguf": {
+        "url": "https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf",
+        "file": "gemma-4-E2B_q4_0-it.gguf",
+        "sha256": ""
+      }
+    }
+  ],
+  "_ggufSha256Note": "Set each model's gguf.sha256 to pin it (SECURITY-AUDIT.md M4): curl -sL <url> | shasum -a 256. Empty string = unverified (download proceeds with a console warning until pinned).",
+  "announcements": [],
+  "_feedPostsNote": "Posts published into every user's home feed (PromptFeed). Fields: id (stable string — dismissals key on it), title, date (ISO), body (markdown), optional link {url, label}. Dismissed ids are stored per-user in the synced 'dismissed-feed-posts' key.",
+  "feedPosts": [
+    {
+      "id": "welcome-feed-2026-07",
+      "title": "Welcome to your feed",
+      "date": "2026-07-17T00:00:00Z",
+      "body": "This is your home stream. Ask the assistant anything in the box above, and schedule prompts (Manage prompts) to have results posted here on their own — a morning briefing, a weekly digest, whatever you find yourself asking for repeatedly. Anjadhe will occasionally share product news in this space too; dismiss any post with the corner button."
+    }
+  ]
+}

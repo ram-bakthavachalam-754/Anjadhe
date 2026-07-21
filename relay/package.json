@@ -1,0 +1,15 @@
+{
+  "name": "anjadhe-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zero-knowledge rendezvous relay for Anjadhe — forwards end-to-end-encrypted frames between a user's Mac and their paired phones. Holds no keys, reads no plaintext.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-smoke.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

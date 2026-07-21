@@ -1,0 +1,250 @@
+/* AI Activity — live view of current + recent AI work (System nav group).
+   Monochrome per the book theme; the only colors are semantic (red = failed). */
+
+.aiact-status-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-lg);
+    background: var(--color-surface);
+}
+
+.aiact-status-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.aiact-status-headline {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.aiact-status-sub {
+    margin-top: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.aiact-engine-line {
+    margin-top: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.aiact-model-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.1em 0.55em;
+    font-size: var(--text-xs);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.aiact-model-engine {
+    color: var(--color-text-tertiary);
+}
+
+.aiact-section-title {
+    text-transform: uppercase;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin: var(--space-lg) 0 var(--space-sm);
+}
+
+#aiactivity-now-section[hidden] { display: none; }
+
+.aiact-recent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.aiact-recent-head .settings-btn-row {
+    margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.aiact-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.aiact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.aiact-row:last-child {
+    border-bottom: none;
+}
+
+.aiact-row.is-clickable {
+    cursor: pointer;
+}
+
+.aiact-row.is-clickable:hover {
+    background: var(--color-surface-hover);
+}
+
+/* ── Detail modal ── */
+
+.aiact-detail-row {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.aiact-detail-row:last-of-type {
+    border-bottom: none;
+}
+
+.aiact-detail-label {
+    flex: 0 0 110px;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    padding-top: 2px;
+}
+
+.aiact-detail-value {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+.aiact-detail-preview {
+    font-style: italic;
+    color: var(--color-text-secondary);
+}
+
+.aiact-detail-foot {
+    margin-top: var(--space-md);
+}
+
+.aiact-detail-hint {
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    margin: 0;
+}
+
+.aiact-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.aiact-label {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: var(--text-sm);
+}
+
+.aiact-desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin-top: 1px;
+}
+
+.aiact-error {
+    font-size: var(--text-xs);
+    color: #dc2626;
+    margin-top: 2px;
+}
+
+.aiact-meta {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-align: right;
+    padding-top: 2px;
+    white-space: nowrap;
+}
+
+.aiact-chip {
+    display: inline-block;
+    margin-left: 0.35em;
+    padding: 0 0.5em;
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    vertical-align: 1px;
+}
+
+.aiact-empty {
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    padding: var(--space-lg);
+    margin: 0;
+}
+
+/* Status dot — filled when done, pulsing when running, hollow while queued. */
+.aiact-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    background: var(--color-text-tertiary);
+}
+
+.aiact-status-head .aiact-dot {
+    margin-top: 0;
+}
+
+.aiact-dot.idle {
+    background: transparent;
+    border: 1.5px solid var(--color-text-tertiary);
+}
+
+.aiact-dot.queued {
+    background: transparent;
+    border: 1.5px solid var(--color-text-secondary);
+}
+
+.aiact-dot.running {
+    background: var(--color-text);
+    animation: aiact-pulse 1.4s ease-in-out infinite;
+}
+
+.aiact-dot.done {
+    background: var(--color-text-tertiary);
+}
+
+.aiact-dot.stopped {
+    background: transparent;
+    border: 1.5px solid var(--color-text-tertiary);
+}
+
+.aiact-dot.failed {
+    background: #dc2626;
+}
+
+@keyframes aiact-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
