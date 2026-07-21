@@ -1,0 +1,1800 @@
+/* ===================================
+   Journal App - Minimal Book Theme
+   =================================== */
+
+/* ── Layout ── */
+
+.journal-layout {
+    display: flex;
+    gap: var(--space-xl);
+}
+
+.journal-sidebar {
+    width: 200px;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.journal-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Premium header chrome (matches the Actions rungs / Assistant capsule). */
+#journal-view .app-header-bar .primary-btn,
+#journal-view .app-header-bar .secondary-btn,
+#journal-viewer-view .editor-actions .primary-btn,
+#journal-viewer-view .editor-actions .secondary-btn,
+#journal-editor-view .editor-actions .primary-btn,
+#journal-editor-view .editor-actions .secondary-btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+.journal-main-toolbar {
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+/* Search — a quiet pill on the surface fill (same voice as the other apps). */
+.journal-main-toolbar .search-input {
+    flex: 1;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+.journal-main-toolbar .search-input:focus {
+    background: var(--color-bg);
+    border-color: var(--color-border-hover);
+    box-shadow: none;
+}
+
+/* List/Diary toggle — pill capsule like the Actions hub strip. */
+.journal-view-toggle {
+    display: inline-flex;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    padding: 3px;
+    flex-shrink: 0;
+}
+
+.journal-view-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    transition: all var(--transition-fast);
+}
+
+.journal-view-toggle-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.journal-view-toggle-btn.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* ── Sidebar ── */
+
+.journal-sidebar-section {
+    margin-bottom: var(--space-xl);
+}
+
+.journal-sidebar-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+    padding: 0 var(--space-sm);
+}
+
+.journal-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.journal-filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.journal-filter-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* Active filter — surface fill + inset ring (the Assistant rail's state). */
+.journal-filter-item.active {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.journal-filter-name {
+    flex: 1;
+}
+
+.journal-filter-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Mood filter */
+.journal-mood-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.journal-mood-filter-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.journal-mood-filter-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.journal-mood-filter-item.active {
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.journal-mood-filter-icon {
+    font-size: var(--text-base);
+    width: 20px;
+    text-align: center;
+}
+
+.journal-mood-filter-label {
+    flex: 1;
+}
+
+.journal-mood-filter-count {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Tag cloud */
+.journal-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding: 0 var(--space-sm);
+}
+
+.journal-tag-cloud-item {
+    font-size: var(--text-xs);
+    padding: 2px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.journal-tag-cloud-item:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.journal-tag-cloud-item.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.journal-tag-cloud-empty {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    padding: 0 var(--space-sm);
+}
+
+/* Stats */
+.journal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: 0 var(--space-sm);
+}
+
+.journal-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-stat-value {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.journal-stat-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: 4px;
+}
+
+/* ── Timeline / Entries ── */
+
+.journal-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-month-group {
+    margin-bottom: var(--space-lg);
+}
+
+/* Month group label — micro-label voice, whitespace instead of a hairline
+   (like the Assistant rail's date groups). */
+.journal-month-header {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+
+/* Soft borderless rows with a hover fill, like the Assistant's rail. */
+.journal-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: 12px var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.journal-entry:hover {
+    background: var(--color-surface-hover);
+}
+
+/* Date column */
+.journal-entry-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.journal-day {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-text);
+}
+
+.journal-weekday {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* Mood column */
+.journal-entry-mood {
+    font-size: var(--text-base);
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    padding-top: 2px;
+}
+
+/* Content column */
+.journal-entry-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.journal-entry-preview {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.journal-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: 4px;
+}
+
+.journal-entry-tags {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.journal-tag {
+    font-size: 10px;
+    padding: 1px 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-tertiary);
+}
+
+/* Actions column */
+.journal-entry-actions {
+    display: flex;
+    gap: var(--space-xs);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.journal-entry:hover .journal-entry-actions {
+    opacity: 1;
+}
+
+.journal-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: var(--space-xs);
+    font-size: var(--text-sm);
+    transition: color var(--transition-fast);
+    line-height: 1;
+}
+
+.journal-action-btn:hover {
+    color: var(--color-text);
+}
+
+/* ── Empty State ── */
+
+.journal-empty-state {
+    text-align: center;
+    padding: 80px var(--space-xl);
+    color: var(--color-text-tertiary);
+    display: none;
+}
+
+.journal-empty-icon {
+    font-size: 32px;
+    margin-bottom: var(--space-md);
+    opacity: 0.3;
+}
+
+.journal-empty-state h3 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.journal-empty-state p {
+    font-size: var(--text-sm);
+}
+
+/* ===================================
+   Journal Form (shared)
+   =================================== */
+
+.mood-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--space-sm);
+}
+
+.mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mood-option:hover {
+    background: var(--color-surface);
+}
+
+.mood-option.selected {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.mood-option-icon {
+    font-size: var(--text-2xl);
+}
+
+.mood-option-label {
+    font-size: var(--text-xs);
+}
+
+.tags-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    min-height: 40px;
+}
+
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+}
+
+.tag-remove {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 0;
+    font-size: var(--text-base);
+    line-height: 1;
+}
+
+.tag-remove:hover {
+    color: var(--color-text);
+}
+
+.tag-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    min-width: 100px;
+    font-size: var(--text-sm);
+}
+
+/* ===================================
+   Journal Editor View — editor-first layout
+   ===================================
+   Design intent:
+   - The writing surface dominates the page; chrome is quiet.
+   - Single metadata strip (date · mood · word count · save dot).
+   - No permanent toolbar — formatting is via the floating selection
+     toolbar, slash menu, and markdown shortcuts in RichEditor v2.
+   - Tags compress to a pill row, mood picker is a popover.
+   - Focus mode dims everything except the current paragraph.
+*/
+
+.journal-editor-header-bar {
+    transition: opacity var(--transition-base);
+}
+
+.journal-focus-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.journal-focus-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.journal-editor-main {
+    max-width: 760px;
+    margin: 0 auto;
+    /* Top padding gives breathing room between the editor header's
+       bottom border and the meta strip; the parent .app-view already
+       pads horizontally, so left/right stay 0. */
+    padding-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ── Quiet metadata strip ── */
+
+.journal-meta-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    flex-wrap: wrap;
+    row-gap: var(--space-xs);
+}
+
+.journal-meta-sep {
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Buttons in the meta strip (date, mood) — get a subtle chip background
+   so they're visually distinguishable from inert labels (word count,
+   save indicator). Hover deepens the contrast. */
+.journal-meta-date-trigger {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.journal-meta-date-trigger:hover,
+.journal-meta-date-trigger:focus {
+    outline: none;
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+/* The native input stays in the DOM (so showPicker() / change events work
+   through it) but is visually hidden. We position it offscreen rather
+   than display:none so the picker can still anchor against it. */
+.journal-meta-date-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.journal-meta-mood {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.journal-meta-mood:hover,
+.journal-meta-mood[aria-expanded="true"] {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+.journal-meta-mood .journal-mood-icon { font-size: var(--text-base); line-height: 1; }
+.journal-meta-mood .journal-mood-label { font-size: var(--text-sm); }
+
+/* Static labels (word count) — visually quieter than the buttons above. */
+.journal-meta-count {
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 3px 0;  /* match button vertical metric so baselines align */
+}
+
+/* Save indicator — icon + text, more legible than a bare dot. The icon
+   is a flex container so the inner shape (a ::before) can be precisely
+   centered without absolute positioning, which fixes the misalignment
+   that showed up when the parent had different line-height than the
+   icon box. */
+.journal-save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    line-height: 1;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 3px 0;
+    transition: color var(--transition-fast);
+}
+
+.journal-save-icon {
+    width: 12px;
+    height: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* SAVED — green-tinted check, signals "all good". */
+.journal-save-indicator[data-state="saved"] {
+    color: #16a34a;  /* semantic success — only colored ink in the strip */
+}
+.journal-save-indicator[data-state="saved"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 5px;
+    height: 9px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+/* SAVING — spinning ring, slightly more emphasis than saved. */
+.journal-save-indicator[data-state="saving"] {
+    color: var(--color-text-secondary);
+}
+.journal-save-indicator[data-state="saving"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border);
+    border-top-color: currentColor;
+    animation: journal-save-spin 0.7s linear infinite;
+}
+
+/* UNSAVED — amber dot, signals "needs attention". */
+.journal-save-indicator[data-state="unsaved"] {
+    color: #d97706;
+}
+.journal-save-indicator[data-state="unsaved"] .journal-save-icon::before {
+    content: "";
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+@keyframes journal-save-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── The writing surface ── */
+
+.journal-content-editor {
+    flex: 1;
+    min-height: 60vh;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 0.9375rem;       /* kept in sync with Notes (.note-content-editor) */
+    /* Inter for the writing surface — reads cleaner than the serif at
+       paragraph length and pairs well with the serif headings. */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.75;
+    letter-spacing: -0.003em;
+    outline: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';  /* Inter's stylistic alts for cleaner letterforms */
+}
+
+.journal-content-editor:focus { outline: none; }
+
+/* Placeholder via data-placeholder so it survives sanitization etc.
+   `:empty` gets brittle once any rich block exists; we instead pair the
+   placeholder with `.is-empty` toggled from JS. The plain :empty rule
+   handles the default first-load case. */
+.journal-content-editor:empty:before {
+    content: attr(data-placeholder);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+    font-style: italic;
+}
+
+/* Block typography inside the editor — Inter throughout for cohesion;
+   weight + size do the work that a font swap used to. */
+.journal-content-editor h1,
+.journal-content-editor h2,
+.journal-content-editor h3 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: var(--space-xl) 0 var(--space-sm);
+}
+
+.journal-content-editor h1 { font-size: 1.875rem; }
+.journal-content-editor h2 { font-size: 1.5rem; }
+.journal-content-editor h3 { font-size: 1.25rem; }
+
+.journal-content-editor p {
+    margin: 0 0 var(--space-md);
+}
+
+.journal-content-editor ul,
+.journal-content-editor ol {
+    margin: var(--space-md) 0;
+    padding-left: 1.5rem;
+}
+
+.journal-content-editor li {
+    margin: 4px 0;
+}
+
+.journal-content-editor a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+.journal-content-editor a:hover { opacity: 0.7; }
+
+.journal-content-editor blockquote {
+    margin: var(--space-md) 0;
+    padding: 4px 0 4px var(--space-md);
+    border-left: 2px solid var(--color-text-tertiary);
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.journal-content-editor pre,
+.journal-content-editor code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    background: var(--color-surface);
+    border-radius: 4px;
+}
+
+.journal-content-editor code { padding: 1px 5px; }
+
+.journal-content-editor pre {
+    padding: var(--space-sm) var(--space-md);
+    margin: var(--space-md) 0;
+    overflow-x: auto;
+    line-height: 1.5;
+}
+
+.journal-content-editor hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-xl) 0;
+}
+
+/* ── Tags pill row ── */
+
+.journal-tags-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.journal-tag-input {
+    border: 1px solid var(--color-border);
+    outline: none;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    padding: 3px 10px;
+    min-width: 140px;
+    border-radius: 999px;
+}
+
+.journal-tag-input:focus {
+    border-color: var(--color-border-hover);
+}
+
+.journal-tag-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.journal-tag-add-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.journal-tag-add-btn:hover {
+    color: var(--color-text-secondary);
+    border-color: var(--color-border-hover);
+}
+
+/* The pill rendered for each tag (re-uses the journal-tag class from
+   the viewer) gets a tiny remove button via JS. We re-style the legacy
+   .tag-item / .tag-remove to fit the new compact strip. */
+.journal-tags-strip .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px 2px 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.journal-tags-strip .tag-remove {
+    background: transparent;
+    border: 0;
+    padding: 0 4px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    border-radius: 50%;
+}
+
+.journal-tags-strip .tag-remove:hover { color: var(--color-text); }
+
+/* ── Mood popover ── */
+
+.journal-mood-popover {
+    position: fixed;
+    z-index: 200;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 6px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+}
+
+.journal-mood-popover[hidden] { display: none; }
+
+.journal-mood-popover .mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-sm);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+    min-width: 64px;
+}
+
+.journal-mood-popover .mood-option:hover { background: var(--color-surface); }
+.journal-mood-popover .mood-option.selected {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.journal-mood-popover .mood-option-icon { font-size: var(--text-xl); line-height: 1; }
+.journal-mood-popover .mood-option-label { font-size: var(--text-xs); color: var(--color-text-secondary); }
+
+/* ── Focus mode ── */
+
+[data-focus-mode="true"] .journal-editor-header-bar { opacity: 0.15; }
+[data-focus-mode="true"] .journal-editor-header-bar:hover { opacity: 1; }
+[data-focus-mode="true"] .journal-meta-strip { opacity: 0.35; transition: opacity var(--transition-base); }
+[data-focus-mode="true"] .journal-meta-strip:hover,
+[data-focus-mode="true"] .journal-meta-strip:focus-within { opacity: 1; }
+[data-focus-mode="true"] .journal-tags-strip { opacity: 0.35; transition: opacity var(--transition-base); }
+[data-focus-mode="true"] .journal-tags-strip:hover,
+[data-focus-mode="true"] .journal-tags-strip:focus-within { opacity: 1; }
+[data-focus-mode="true"] .journal-editor-main { max-width: 720px; }
+
+/* Dim non-current paragraphs. A `.is-focused` class is toggled by JS on
+   the block containing the caret. Only paragraphs/headings/etc. dim;
+   the editor itself stays at full opacity to avoid a heavy "card"
+   feeling. */
+[data-focus-mode="true"] .journal-content-editor > * {
+    opacity: 0.32;
+    transition: opacity var(--transition-base);
+}
+[data-focus-mode="true"] .journal-content-editor > .is-focused {
+    opacity: 1;
+}
+
+/* ===================================
+   Journal Viewer View (Read-only)
+   =================================== */
+
+/* Viewer mirrors the editor's layout: same comfortable measure, same
+   Inter typography, same calm chrome. The two views should feel like
+   the same surface in two states (read vs write). */
+
+.journal-viewer-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* The viewer's meta strip uses the same .journal-meta-strip shell as
+   the editor — date, mood pill, reading time, tags — single row. */
+.journal-viewer-meta {
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Date in the viewer renders as a quiet read-only chip mirroring the
+   editor's date trigger, minus interactivity. */
+.journal-viewer-date {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Mood display is now just a wrapper around a single pill. */
+.journal-mood-display { display: inline-flex; align-items: center; flex-shrink: 0; }
+.journal-mood-display .journal-mood-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+.journal-mood-display .journal-mood-icon { font-size: var(--text-base); line-height: 1; }
+.journal-mood-display .journal-mood-label { font-size: var(--text-sm); text-transform: capitalize; }
+
+.journal-viewer-content {
+    /* Inter for body — paired weight contrast with the date title above. */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.9375rem;       /* kept in sync with Notes (.note-content-display) */
+    line-height: 1.75;
+    letter-spacing: -0.003em;
+    color: var(--color-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+.journal-viewer-content p {
+    margin: 0 0 var(--space-md);
+}
+
+.journal-viewer-content h1,
+.journal-viewer-content h2,
+.journal-viewer-content h3 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: var(--space-xl) 0 var(--space-sm);
+}
+
+.journal-viewer-content h1 { font-size: 1.875rem; }
+.journal-viewer-content h2 { font-size: 1.5rem; }
+.journal-viewer-content h3 { font-size: 1.25rem; }
+
+.journal-viewer-content ul,
+.journal-viewer-content ol {
+    margin: var(--space-md) 0;
+    padding-left: 1.5rem;
+}
+
+.journal-viewer-content li {
+    margin: 4px 0;
+}
+
+.journal-viewer-content a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+.journal-viewer-content a:hover { opacity: 0.7; }
+
+.journal-viewer-content blockquote {
+    margin: var(--space-md) 0;
+    padding: 4px 0 4px var(--space-md);
+    border-left: 2px solid var(--color-text-tertiary);
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.journal-viewer-content pre,
+.journal-viewer-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    background: var(--color-surface);
+    border-radius: 4px;
+}
+
+.journal-viewer-content code { padding: 1px 5px; }
+
+.journal-viewer-content pre {
+    padding: var(--space-sm) var(--space-md);
+    margin: var(--space-md) 0;
+    overflow-x: auto;
+    line-height: 1.5;
+}
+
+.journal-viewer-content hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-xl) 0;
+}
+
+/* Read-only tag cluster inside the viewer's meta strip — same right-edge
+   anchoring as the editor's tag cluster, but no remove buttons. */
+.journal-tags-strip--readonly:empty {
+    display: none;
+}
+
+.journal-tags-strip .tag-item--readonly {
+    padding: 2px 10px;
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+
+@media (max-width: 768px) {
+    .journal-layout {
+        flex-direction: column;
+    }
+
+    .journal-sidebar {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        gap: var(--space-lg);
+        flex-wrap: wrap;
+    }
+
+    .journal-sidebar-section {
+        margin-bottom: var(--space-sm);
+    }
+
+    .journal-editor-main {
+        padding: var(--space-md);
+    }
+
+    .journal-mood-popover {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .journal-entry-actions {
+        opacity: 1;
+    }
+}
+
+/* ===================================
+   Diary View (book-style layout)
+   =================================== */
+
+.journal-diary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-lg) 0 var(--space-2xl);
+    perspective: 2000px;
+}
+
+.journal-diary-empty {
+    padding: var(--space-2xl);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Counter (e.g. "3 of 17") above the book */
+.diary-counter {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-md);
+    min-height: 1em;
+}
+
+/* ── Closed book (cover) ── */
+
+.diary-book {
+    position: relative;
+    width: min(820px, 100%);
+    height: 560px;
+    transform-style: preserve-3d;
+    transition: transform var(--transition-slow);
+}
+
+.diary-cover {
+    position: absolute;
+    inset: 0;
+    margin: 0 auto;
+    width: 320px;
+    height: 460px;
+    top: 50px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: 4px 10px 10px 4px;
+    box-shadow:
+        inset 8px 0 0 rgba(255, 255, 255, 0.04),
+        inset 10px 0 0 rgba(0, 0, 0, 0.25),
+        var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    font-family: var(--font-serif);
+    user-select: none;
+}
+
+.diary-cover::before {
+    /* inner decorative border frame */
+    content: "";
+    position: absolute;
+    inset: 20px 20px 20px 32px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.diary-cover::after {
+    /* spine band */
+    content: "";
+    position: absolute;
+    left: 16px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.diary-cover:hover {
+    transform: translateY(-3px) rotateZ(-0.3deg);
+    box-shadow:
+        inset 8px 0 0 rgba(255, 255, 255, 0.04),
+        inset 10px 0 0 rgba(0, 0, 0, 0.25),
+        0 12px 28px rgba(0, 0, 0, 0.2),
+        0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+.diary-cover-title {
+    font-size: 28px;
+    letter-spacing: 0.4em;
+    font-weight: 300;
+    margin-bottom: var(--space-lg);
+    text-transform: uppercase;
+    padding-left: 0.4em; /* offset letter-spacing */
+}
+
+.diary-cover-rule {
+    width: 48px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+    margin-bottom: var(--space-md);
+}
+
+.diary-cover-author {
+    font-size: var(--text-sm);
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+    font-weight: 300;
+    text-transform: uppercase;
+    padding-left: 0.2em;
+}
+
+.diary-cover-hint {
+    position: absolute;
+    bottom: var(--space-md);
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    font-family: var(--font-sans);
+}
+
+/* ── Opened book (two-page spread) ── */
+
+.diary-spread {
+    /* Dimensions: fixed, viewport-derived. Content inside the pages
+       is paginated in JS so the book itself never stretches. */
+    --diary-header-h: 92px;
+    --diary-footer-h: 112px;
+    --diary-page-padding-x: var(--space-xl);
+    --diary-page-padding-y: var(--space-lg);
+    --diary-spread-h: min(720px, calc(100vh - 260px));
+    --diary-content-h: calc(
+        var(--diary-spread-h)
+        - var(--diary-header-h)
+        - var(--diary-footer-h)
+        - calc(var(--diary-page-padding-y) * 2)
+    );
+
+    position: relative;
+    width: min(940px, 100%);
+    display: flex;
+    background: var(--color-bg);
+    border-radius: 6px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 10px 30px rgba(0, 0, 0, 0.12),
+        0 30px 60px rgba(0, 0, 0, 0.08);
+    height: var(--diary-spread-h);
+    /* Fade-in when the book "opens" */
+    animation: diary-open 0.6s ease-out both;
+}
+
+@keyframes diary-open {
+    0% {
+        opacity: 0;
+        transform: scale(0.94) rotateY(-8deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotateY(0);
+    }
+}
+
+/* Outer book frame — leather edging */
+.diary-spread::before {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    background: var(--color-text);
+    border-radius: 10px;
+    z-index: -1;
+    box-shadow: var(--shadow-lg);
+}
+
+.diary-page {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    border-radius: 6px;
+    padding: var(--diary-page-padding-y) var(--diary-page-padding-x);
+    position: relative;
+    font-family: 'Inter', var(--font-sans);
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Solid page background — required because .diary-spread has a
+       transform-based opening animation, which creates a stacking
+       context. Without an explicit background here, the ::before
+       "leather frame" shows through the pages. */
+    background-color: var(--color-bg);
+    /* Horizontal ruled lines like notebook paper */
+    background-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 33px,
+        var(--color-border-light) 33px,
+        var(--color-border-light) 34px
+    );
+    background-size: 100% 34px;
+    background-position: 0 var(--diary-header-h);
+}
+
+/* ── Page header (date, mood) ── */
+
+.diary-page-header {
+    /* Fixed-height zone, identical on left and right pages so the
+       content area below lines up. The left page shows date + mood;
+       the right page shows a subtle "(continued)" marker and the
+       mood glyph, or is left empty. */
+    flex: 0 0 var(--diary-header-h);
+    height: var(--diary-header-h);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-bg);
+    /* Extend edge-to-edge over the page padding */
+    margin: calc(var(--diary-page-padding-y) * -1) calc(var(--diary-page-padding-x) * -1) 0;
+    padding: var(--diary-page-padding-y) var(--diary-page-padding-x) var(--space-sm);
+}
+
+.diary-page-header-continued {
+    /* Inline label next to the date when the entry continues on a
+       later page. */
+    margin-left: var(--space-sm);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-style: italic;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-tertiary);
+    vertical-align: middle;
+}
+
+.diary-page-date {
+    font-family: 'Kalam', var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+}
+
+.diary-page-date-weekday {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: var(--space-xs);
+    font-family: var(--font-sans);
+}
+
+.diary-page-mood {
+    font-size: 28px;
+    line-height: 1;
+    filter: grayscale(1);
+    opacity: 0.85;
+}
+
+/* Right-aligned cluster in the page header: tags then mood emoji */
+.diary-page-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 60%;
+}
+
+/* ── Page content (handwritten body) ── */
+
+.diary-page-content {
+    font-family: 'Inter', var(--font-sans);
+    font-size: 16px;
+    line-height: 34px; /* aligns with ruled lines */
+    color: var(--color-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    /* Exact height so the book frame never stretches with content.
+       Content that doesn't fit is paginated into more spreads in JS. */
+    flex: 0 0 var(--diary-content-h);
+    height: var(--diary-content-h);
+    max-height: var(--diary-content-h);
+    overflow: hidden;
+}
+
+.diary-page-content p {
+    margin: 0 0 var(--space-md);
+}
+
+.diary-page-content h1,
+.diary-page-content h2,
+.diary-page-content h3 {
+    font-family: 'Inter', var(--font-sans);
+    font-weight: 700;
+    margin: var(--space-md) 0 var(--space-sm);
+    line-height: 34px;
+}
+
+.diary-page-content h1 { font-size: 24px; }
+.diary-page-content h2 { font-size: 21px; }
+.diary-page-content h3 { font-size: 19px; }
+
+.diary-page-content ul,
+.diary-page-content ol {
+    padding-left: var(--space-lg);
+    margin: 0 0 var(--space-md);
+}
+
+.diary-page-content blockquote {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-md);
+    border-left: 2px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+/* ── Page footer (tags, nav, pager controls) ── */
+
+.diary-page-footer {
+    /* Same fixed-height zone on both pages so content areas align. */
+    flex: 0 0 var(--diary-footer-h);
+    height: var(--diary-footer-h);
+    box-sizing: border-box;
+    padding-top: var(--space-md);
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+/* Pager row: prev (left) and next (right) on a single line */
+.diary-page-pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+/* "See more" / "Previous" pager link that lives in the footer */
+.diary-pager-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-top: auto;
+    transition: color var(--transition-fast);
+}
+
+.diary-pager-link:hover {
+    color: var(--color-text);
+}
+
+.diary-pager-link.align-left {
+    align-self: flex-start;
+}
+
+.diary-page-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-sans);
+}
+
+.diary-page-tag {
+    font-size: var(--text-xs);
+    padding: 2px var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-tertiary);
+}
+
+.diary-page-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border-light);
+    font-family: var(--font-sans);
+}
+
+.diary-entry-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.diary-entry-action-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-tertiary);
+    padding: 4px 10px;
+    font-size: var(--text-xs);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: var(--font-sans);
+}
+
+.diary-entry-action-btn:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+/* Prev/Next page turn arrows */
+.diary-page-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.diary-page-nav-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-base);
+    transition: all var(--transition-fast);
+}
+
+.diary-page-nav-btn:hover:not(:disabled) {
+    border-color: var(--color-text);
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.diary-page-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.diary-page-nav-btn-wide {
+    width: auto;
+    padding: 0 12px;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-sans);
+    margin-right: var(--space-xs);
+}
+
+/* ── Table of Contents (TOC) ── */
+
+.diary-toc-page {
+    flex: 1 1 100%;
+    /* Override .diary-page max-width: 50% so the TOC fills the spread */
+    max-width: 100%;
+    /* Take the whole spread width — no gutter for the TOC */
+    border-right: none;
+    border-radius: 4px 10px 10px 4px;
+    box-shadow: none;
+    /* The TOC doesn't need ruled lines */
+    background-image: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.diary-toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: calc(var(--space-xl) * -1) calc(var(--space-xl) * -1) var(--space-lg);
+    padding: var(--space-xl) var(--space-xl) var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.diary-toc-title {
+    font-family: 'Inter', var(--font-sans);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.diary-toc-list {
+    flex: 1;
+    column-count: 2;
+    column-gap: var(--space-2xl);
+    column-rule: 1px solid var(--color-border-light);
+    overflow-y: auto;
+    padding-right: var(--space-xs);
+}
+
+.diary-toc-month {
+    break-inside: avoid-column;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: var(--space-lg);
+}
+
+.diary-toc-month-header {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-tertiary);
+    padding: var(--space-xs) 0;
+    margin-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border-light);
+    font-family: var(--font-sans);
+}
+
+.diary-toc-entry {
+    display: grid;
+    grid-template-columns: 28px auto 24px 1fr;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding: 6px var(--space-xs);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+    font-family: 'Inter', var(--font-sans);
+}
+
+.diary-toc-entry:hover {
+    background: var(--color-surface-hover);
+}
+
+.diary-toc-entry.active {
+    background: var(--color-surface);
+    outline: 1px solid var(--color-border);
+}
+
+.diary-toc-entry:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 1px;
+}
+
+.diary-toc-day {
+    font-family: 'Inter', var(--font-sans);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text);
+    text-align: right;
+    line-height: 1;
+}
+
+.diary-toc-weekday {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+}
+
+.diary-toc-mood {
+    font-size: 16px;
+    filter: grayscale(1);
+    opacity: 0.85;
+    text-align: center;
+}
+
+.diary-toc-preview {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+}
+
+.diary-toc-preview em {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+/* Close-book button (return to cover / list) */
+.diary-close-btn {
+    position: absolute;
+    top: -28px;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: var(--space-xs);
+    font-family: var(--font-sans);
+    transition: color var(--transition-fast);
+}
+
+.diary-close-btn:hover {
+    color: var(--color-text);
+}
+
+/* Page-turn animation (re-runs on each navigation) */
+.diary-spread.diary-turning {
+    animation: diary-page-turn 0.45s ease-out;
+}
+
+@keyframes diary-page-turn {
+    0% {
+        transform: rotateY(-3deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: rotateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── Diary responsive ── */
+
+@media (max-width: 768px) {
+    .diary-book {
+        width: 100%;
+        height: auto;
+    }
+
+    .diary-cover {
+        position: relative;
+        top: 0;
+        width: 260px;
+        height: 380px;
+        margin: var(--space-lg) auto;
+    }
+
+    .diary-spread {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .diary-page {
+        padding: var(--space-lg);
+    }
+
+    .diary-page-header {
+        margin: calc(var(--space-lg) * -1);
+        margin-bottom: var(--space-md);
+        padding: var(--space-lg);
+    }
+}

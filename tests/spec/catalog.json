@@ -1,0 +1,143 @@
+{
+  "specVersion": 1,
+  "components": [
+    {
+      "type": "paragraph",
+      "category": "text",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "section",
+      "category": "layout",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "divider",
+      "category": "layout",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "card",
+      "category": "layout",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "columns",
+      "category": "layout",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "tabs",
+      "category": "layout",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "summary_grid",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "list",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "table",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "form",
+      "category": "data-entry",
+      "since": 1,
+      "declaresCollection": true
+    },
+    {
+      "type": "record_list",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": true
+    },
+    {
+      "type": "lookup",
+      "category": "integration",
+      "since": 1,
+      "declaresCollection": true
+    },
+    {
+      "type": "progress",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "stat",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "badge",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "key_value",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "gauge",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "timeline",
+      "category": "data-display",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "button",
+      "category": "interaction",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "chart",
+      "category": "visualization",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "sparkline",
+      "category": "visualization",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "image",
+      "category": "media",
+      "since": 1,
+      "declaresCollection": false
+    },
+    {
+      "type": "icon",
+      "category": "media",
+      "since": 1,
+      "declaresCollection": false
+    }
+  ]
+}
