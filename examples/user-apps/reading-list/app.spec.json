@@ -1,0 +1,24 @@
+{
+    "specVersion": 1,
+    "title": "Reading List",
+    "components": [
+        { "type": "paragraph", "text": "Books I'm reading and have finished." },
+        { "type": "summary_grid", "items": [
+            { "label": "Books", "value": { "count": "books" } }
+        ]},
+        { "type": "form", "collection": "books", "title": "Add a book", "submitLabel": "Add book", "fields": [
+            { "name": "title", "label": "Title", "input": "text", "required": true },
+            { "name": "author", "label": "Author", "input": "text" },
+            { "name": "status", "label": "Status", "input": "select", "options": ["reading", "finished", "want to read"] }
+        ]},
+        { "type": "record_list", "collection": "books", "title": "Books",
+          "fields": ["title", "author", "status"],
+          "empty": "No books yet — add your first one above.",
+          "sort": { "by": "createdAt", "dir": "desc" },
+          "editFields": [
+            { "name": "title", "label": "Title", "input": "text", "required": true },
+            { "name": "author", "label": "Author", "input": "text" },
+            { "name": "status", "label": "Status", "input": "select", "options": ["reading", "finished", "want to read"] }
+          ] }
+    ]
+}

@@ -1,0 +1,4095 @@
+/* ===================================
+   Minimal Book Theme - Core Design System
+   Inspired by clean, readable typography
+   =================================== */
+
+:root {
+    /* Tells the UA which theme it may render native surfaces in — system
+       colors (CanvasText on <dialog>), scrollbars, <select> popups, date
+       pickers. Without it those stay light-themed even in dark mode. */
+    color-scheme: light;
+
+    /* Colors - Refined Monochrome */
+    --color-bg: #ffffff;
+    --color-text: #111111;
+    --color-text-secondary: #222222;
+    --color-text-tertiary: #444444;
+    --color-border: #e4e4e4;
+    --color-border-light: #f0f0f0;
+    --color-surface: #f8f8f8;
+    --color-surface-hover: #f2f2f2;
+    --color-border-hover: #c0c0c0;
+
+    /* Typography */
+    --font-serif: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.375rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 2rem;
+
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Layout */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Standard page content width. Most app views are capped at this and
+       centered so content doesn't sprawl edge-to-edge on wide displays.
+       Multi-pane views (email, calendar, portfolio, etc.) opt out via
+       `.app-view-full`; reading/editor views keep their own narrower caps. */
+    --app-content-max: 1100px;
+
+    /* Shadows - layered for depth */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.06);
+
+    /* Transitions */
+    --transition-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+    --transition-base: 200ms cubic-bezier(0.2, 0, 0, 1);
+    --transition-slow: 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-bg: #161616;
+    --color-text: #eeeeee;
+    --color-text-secondary: #b8b8b8;
+    --color-text-tertiary: #808080;
+    --color-border: #2e2e2e;
+    --color-border-light: #222222;
+    --color-surface: #1e1e1e;
+    --color-surface-hover: #272727;
+    --color-border-hover: #555555;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 6px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ===================================
+   Lock Screen
+   =================================== */
+
+#lock-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    background: var(--color-bg);
+    backdrop-filter: blur(30px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: lockScreenFadeIn 300ms ease forwards;
+}
+
+@keyframes lockScreenFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.lock-screen-content {
+    text-align: center;
+    padding: var(--space-2xl);
+    /* Match the App Lock overlay: sit higher so content tucks behind the macOS
+       Touch ID system prompt. */
+    transform: translateY(-12vh);
+}
+
+.lock-screen-title {
+    font-family: var(--font-serif);
+    font-size: 3rem;
+    font-weight: 200;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+    letter-spacing: -0.02em;
+}
+
+.lock-screen-subtitle {
+    font-size: var(--text-base);
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-2xl);
+}
+
+.lock-screen-btn {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    padding: 12px 32px;
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.lock-screen-btn:hover {
+    opacity: 0.85;
+}
+
+.lock-screen-btn:active {
+    transform: scale(0.97);
+}
+
+.lock-screen-fallback {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-lg);
+}
+
+/* ===================================
+   App Lock — per-app unlock overlay
+   =================================== */
+.applock-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: var(--color-bg);
+    backdrop-filter: blur(30px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: lockScreenFadeIn 200ms ease forwards;
+}
+
+.applock-card {
+    width: 320px;
+    max-width: 88vw;
+    text-align: center;
+    padding: var(--space-2xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    /* Sit higher than dead-center so the content tucks up behind the macOS
+       Touch ID system prompt (which appears in the upper-middle of the screen)
+       rather than peeking out below it. */
+    transform: translateY(-12vh);
+}
+
+.applock-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+}
+
+.applock-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.applock-subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin: 0 0 var(--space-md);
+}
+
+.applock-touchid-btn {
+    width: auto;
+    align-self: center;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    padding: 10px 28px;
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+    margin-bottom: var(--space-sm);
+}
+.applock-touchid-btn:hover { opacity: 0.85; }
+
+.applock-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.applock-input,
+.applock-dialog-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    text-align: center;
+}
+.applock-input:focus,
+.applock-dialog-input:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+.applock-unlock-btn { width: 100%; }
+
+.applock-error,
+.applock-dialog-error {
+    font-size: var(--text-sm);
+    color: #dc2626;
+    margin: 0;
+}
+
+.applock-cancel-btn,
+.applock-forgot-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    margin-top: var(--space-sm);
+    padding: var(--space-xs);
+}
+.applock-cancel-btn:hover,
+.applock-forgot-btn:hover { color: var(--color-text); }
+.applock-forgot-btn {
+    margin-top: var(--space-xs);
+    text-decoration: underline;
+}
+
+/* Passcode set/confirm dialog (in a shared Modal). */
+.applock-passcode-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 320px;
+}
+.applock-dialog-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-top: var(--space-sm);
+}
+.applock-dialog-input { text-align: left; }
+.applock-dialog-prompt {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-sm);
+}
+.applock-dialog-section {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text);
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* ===================================
+   Base Styles
+   =================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Always show the document scrollbar track so centered page content
+   (.app-view) sits at the same x-offset whether or not a view is tall
+   enough to scroll — without this, switching between Actions rungs shifts
+   the header a few px. (scrollbar-gutter: stable is ignored on the
+   viewport in this Chromium, hence overflow-y: scroll.) */
+html {
+    overflow-y: scroll;
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.65;
+    color: var(--color-text);
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+/* ===================================
+   Layout
+   =================================== */
+
+#app-container {
+    min-height: 100vh;
+    padding-top: 38px; /* titlebar height */
+}
+
+#app-views {
+    /* Offset for the global left nav (.dash-nav, fixed 216px).
+       margin-right is added dynamically when the agent panel is open
+       (see body.agent-panel-open rule in css/apps/agent.css). */
+    margin-left: 216px;
+}
+
+/* App Titlebar */
+.app-titlebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 38px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    /* Full-width bar: the hairline runs all the way to the left edge;
+       the nav rail's vertical border starts below it. */
+    border-bottom: 1px solid var(--color-border);
+}
+
+.titlebar-drag-region {
+    -webkit-app-region: drag;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Wordmark — centered in the titlebar, clear of the traffic lights and
+   the rail seam. */
+.titlebar-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.02em;
+    -webkit-app-region: drag;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+
+.titlebar-btn {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    transition: all var(--transition-fast);
+}
+
+.titlebar-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.titlebar-actions {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.titlebar-actions .titlebar-btn {
+    position: static;
+    transform: none;
+}
+
+/* AI Activity titlebar button — the engine's heartbeat in the chrome.
+   Quiet at rest; while any AI work runs it pulses and grows an amber
+   working dot (same semantic amber as the assistant's Busy state).
+   Clicking opens the AI Activity page either way. */
+.titlebar-ai-activity {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.titlebar-ai-activity svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.titlebar-ai-activity.is-busy svg {
+    animation: titlebar-ai-pulse 1.4s ease-in-out infinite;
+    color: var(--color-text);
+}
+
+.titlebar-ai-activity.is-busy::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #d97706;
+    animation: titlebar-ai-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes titlebar-ai-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+/* Thin separator between the status cluster, quick-create actions, and
+   the theme/agent toggles — keeps the row legible without adding weight. */
+.titlebar-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--color-border);
+    margin: 0 2px;
+}
+
+/* Titlebar quick-capture modal (new note / new task) */
+.quick-capture {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-width: 360px;
+}
+
+.quick-capture-title {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: var(--text-base);
+    transition: border-color var(--transition-fast);
+}
+
+.quick-capture-title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--text-lg);
+}
+
+.quick-capture-title:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+}
+
+.quick-capture-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Explicit link-context chip ("→ <goal> ×") in the capture modal */
+.quick-capture-context {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    align-self: flex-start;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 4px 2px 8px;
+}
+
+.quick-capture-context-label {
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quick-capture-context-remove {
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.quick-capture-context-remove:hover {
+    color: var(--color-text);
+}
+
+/* Sync Indicator */
+.sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    animation: sync-fade-in 300ms ease;
+    white-space: nowrap;
+}
+
+.sync-indicator-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.sync-indicator-text {
+    font-family: var(--font-sans);
+}
+
+.sync-indicator.fade-out {
+    animation: sync-fade-out 600ms ease forwards;
+}
+
+/* Updater Pill — appears in the titlebar next to the sync indicator
+ * when a new version has been downloaded and is ready to install. Stays
+ * visible until the user clicks Install (which restarts the app) or
+ * quits normally (auto-install on next launch handles it either way).
+ */
+.updater-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    padding: 2px 4px 2px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    animation: sync-fade-in 300ms ease;
+    white-space: nowrap;
+}
+
+.updater-pill-icon {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.updater-pill-text {
+    font-family: var(--font-sans);
+}
+
+.updater-pill-btn {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.updater-pill-btn:hover {
+    opacity: 0.85;
+}
+
+/* First-run wizard: low-RAM note (step 2c). Shown when the
+ * machine's RAM is below the floor for any local model. Visual style
+ * mirrors the other setup-* panels — thin border, surface background,
+ * minimal typography. The error/success state colors use the same
+ * semantic values as the rest of the app.
+ */
+
+
+
+
+.setup-note-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin: var(--space-sm) 0 var(--space-lg);
+}
+
+.setup-note-hint a {
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+}
+
+.setup-note-hint a:hover {
+    color: var(--color-text);
+}
+
+/* Keep settings-path breadcrumbs ("Settings › AI Assistant") on one line */
+.setup-nowrap {
+    white-space: nowrap;
+}
+
+/* Second sentence of a setup note gets its own line */
+.setup-note-line {
+    display: block;
+    margin-top: var(--space-xs);
+}
+
+
+
+@keyframes sync-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sync-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* App Picker */
+.app-picker {
+    position: relative;
+}
+
+.app-picker-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    min-width: 280px;
+}
+
+.app-picker-dropdown.open {
+    display: grid;
+}
+
+.app-picker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 12px 8px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.app-picker-item:hover {
+    background: var(--color-surface-hover);
+}
+
+.app-picker-item.active {
+    background: var(--color-surface-hover);
+}
+
+.app-picker-item-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.app-picker-item-name {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: 1;
+}
+
+.app-picker-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--color-border);
+    margin: 4px 0;
+}
+
+/* Profile Switcher */
+.profile-switcher {
+    position: relative;
+}
+
+.profile-switcher-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs);
+    font-family: var(--font-serif);
+    color: var(--color-text-secondary);
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast);
+}
+
+.profile-switcher-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+.profile-switcher-caret {
+    font-size: 8px;
+    opacity: 0.5;
+}
+
+.profile-switcher-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    min-width: 140px;
+}
+
+.profile-switcher-dropdown.open {
+    display: block;
+}
+
+.profile-switcher-item {
+    display: block;
+    width: 100%;
+    padding: 6px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-family: var(--font-serif);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.profile-switcher-item:hover {
+    background: var(--color-surface-hover);
+}
+
+.profile-switcher-item.active {
+    font-weight: 600;
+}
+
+.profile-switcher-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 4px 0;
+}
+
+.profile-switcher-action {
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+}
+
+/* Show/hide sun/moon based on theme */
+.theme-icon-dark { display: none; }
+[data-theme="dark"] .theme-icon-light { display: none; }
+[data-theme="dark"] .theme-icon-dark { display: inline; }
+
+/* Make interactive elements clickable over drag region */
+button, a, input, select, textarea,
+.app-card {
+    -webkit-app-region: no-drag;
+}
+
+
+/* ===================================
+   Initial Loading Overlay
+   =================================== */
+
+.app-initial-loader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    background: var(--color-bg);
+}
+
+body.app-loading .app-initial-loader {
+    display: flex;
+}
+
+body.app-loading #app-container,
+body.app-loading .dash-sidebar,
+body.app-loading .app-titlebar {
+    visibility: hidden;
+}
+
+.app-initial-loader-logo {
+    width: 160px;
+    height: 160px;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.app-initial-loader-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-text);
+    border-radius: 50%;
+    animation: appLoaderSpin 700ms linear infinite;
+}
+
+@keyframes appLoaderSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   Views
+   =================================== */
+
+.view {
+    display: none;
+    flex: 1;
+}
+
+.view.active {
+    display: block;
+    animation: viewFadeIn 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes viewFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================
+   First-Run Setup
+   =================================== */
+
+.setup-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-xl);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.setup-kicker {
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-md);
+}
+
+/* App logo atop the first-run welcome. Matches the About hero logo's rounded
+   treatment; centered above the title. */
+.setup-logo {
+    width: 72px;
+    height: 72px;
+    display: block;
+    margin: 0 auto var(--space-md);
+    border-radius: var(--radius-md);
+}
+
+.setup-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    margin-bottom: var(--space-lg);
+    letter-spacing: -0.02em;
+}
+
+/* Selected-model summary card (Step 2b) */
+.setup-selected-model {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    text-align: left;
+    padding: var(--space-md) var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+}
+
+.setup-selected-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.setup-selected-name {
+    font-weight: 600;
+    color: var(--color-text);
+    word-break: break-all;
+}
+
+.setup-selected-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.setup-selected-aside {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-shrink: 0;
+}
+
+.setup-selected-size {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.setup-change-link {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.setup-change-link:hover {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
+}
+
+.setup-description {
+    color: var(--color-text-secondary);
+    font-size: var(--text-base);
+    line-height: 1.75;
+    margin-bottom: var(--space-xl);
+}
+
+.setup-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+    /* Keep buttons a sensible size even though the content column is
+       now wider — the actions block stays centered and narrow. */
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.setup-btn {
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--text-base);
+    width: 100%;
+}
+
+.setup-path {
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    word-break: break-all;
+}
+
+/* Setup wizard steps */
+.setup-steps {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-2xl);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.setup-step-indicator {
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: color var(--transition-fast);
+}
+
+.setup-step-indicator.active {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.setup-step-divider {
+    color: var(--color-border);
+}
+
+.setup-step-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── First-run welcome (step 1): the privacy boundary as layout ──
+   A hairline frame labeled "Your Mac" encloses the assistant and the
+   user's data; the opt-in line is the only copy outside it. Same
+   thin-border vocabulary as every card in the app, used as meaning. */
+.setup-boundary {
+    position: relative;
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl) var(--space-xl) var(--space-xl);
+    margin-bottom: var(--space-lg);
+}
+
+/* The kicker needs clear air above the frame — its label sits half
+   OUTSIDE the top border, so the shared kicker margin isn't enough. */
+.setup-step-content > .setup-kicker {
+    margin-bottom: var(--space-xl);
+}
+
+/* Legend-style label sitting ON the top border, interrupting it. */
+.setup-boundary-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-bg);
+    padding: 0 var(--space-md);
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.setup-boundary .setup-logo {
+    width: 64px;
+    height: 64px;
+}
+
+/* Larger than the shared setup-title — five words earn display size. */
+.setup-hero-title {
+    font-size: clamp(2rem, 4.5vw, 2.75rem);
+    line-height: 1.15;
+    margin-bottom: var(--space-lg);
+}
+
+.setup-boundary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.setup-chip {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    padding: 3px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+.setup-boundary-desc {
+    max-width: 46ch;
+    margin: 0 auto;
+}
+
+.setup-outside {
+    max-width: 54ch;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin: 0 auto var(--space-xl);
+}
+
+.setup-outside strong {
+    display: block;
+    margin-top: var(--space-xs);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* Quiet staggered entrance; skipped entirely under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+    .setup-rise {
+        opacity: 0;
+        animation: setup-rise 0.55s ease forwards;
+    }
+    .setup-rise:nth-child(2) { animation-delay: 0.1s; }
+    .setup-rise:nth-child(3) { animation-delay: 0.22s; }
+    .setup-rise:nth-child(4) { animation-delay: 0.32s; }
+    .setup-rise:nth-child(5) { animation-delay: 0.38s; }
+}
+
+@keyframes setup-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.setup-model-card {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    text-align: left;
+}
+
+.setup-model-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+}
+
+.setup-model-name {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 600;
+}
+
+.setup-model-size {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.setup-model-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin: 0;
+}
+
+/* Progress bar (shared by setup + settings) */
+.setup-progress {
+    width: 100%;
+    margin-bottom: var(--space-lg);
+}
+
+.setup-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--color-surface);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--color-border-light);
+}
+
+.setup-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--color-text);
+    border-radius: 3px;
+    transition: width 300ms ease;
+}
+
+.setup-progress-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-sm);
+    text-align: center;
+}
+
+/* Live download stats: "1.2 GB of 7.2 GB · 21 MB/s · about 5 min left" */
+.setup-progress-stats {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-xs);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    min-height: 1.3em; /* reserve the line so the layout doesn't jump when stats appear */
+}
+
+.setup-progress-reassure {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-sm);
+    text-align: center;
+}
+
+/* Rotating "while you wait" card. A fixed min-height keeps the rotation from
+   reflowing the page; the text cross-fades via the .fading opacity toggle. */
+.setup-download-tip {
+    margin: var(--space-lg) auto 0;
+    max-width: 480px;
+    min-height: 3.5em;
+    padding: var(--space-md) var(--space-lg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+    line-height: 1.6;
+    opacity: 1;
+    transition: opacity 400ms ease;
+}
+
+.setup-download-tip.fading {
+    opacity: 0;
+}
+
+.setup-download-tip .setup-tip-label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-xs);
+}
+
+/* Engine status in settings (class names are historical) */
+.settings-ollama-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.ollama-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-border);
+}
+
+.ollama-status-dot.active {
+    background: #16a34a;
+}
+
+/* ===================================
+   Dashboard — Daily Command Center
+   =================================== */
+
+/* --- Global Left Nav Sidebar --- */
+.dash-sidebar {
+    width: 160px;
+    min-width: 160px;
+    padding: var(--space-md) var(--space-sm);
+    padding-top: 12px;
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--color-bg);
+    position: fixed;
+    top: 38px;
+    left: 0;
+    height: calc(100vh - 38px);
+    z-index: 50;
+    overflow-y: auto;
+}
+
+.dash-sidebar .dash-quick-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+    border: none;
+    width: 100%;
+    font-weight: 450;
+    letter-spacing: -0.005em;
+}
+
+.dash-sidebar .dash-quick-chip:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.dash-sidebar .dash-quick-chip.active {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.dash-chip-icon {
+    font-size: var(--text-base);
+    line-height: 1;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.dash-quick-chip.active .dash-chip-icon {
+    opacity: 1;
+}
+
+.dash-quick-chip:hover .dash-chip-icon {
+    opacity: 1;
+}
+
+.dash-quick-chip[data-app="home"] .dash-chip-icon {
+    font-size: var(--text-lg);
+}
+
+.dash-chip-label {
+    flex: 1;
+}
+
+.dash-chip-badge {
+    font-size: 9px;
+    font-weight: 600;
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.dash-chip-badge:empty {
+    display: none;
+}
+
+.dash-sidebar-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: var(--space-sm) 10px;
+}
+
+/* --- Dashboard Main Content --- */
+.dashboard-container {
+    /* One readable column: the greeting, the composer (720px), and the
+       feed share an axis, so home reads as a single calm stream rather
+       than a wall. Lives inside the scrolling .dash-main pane. */
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-xl) var(--space-2xl);
+    padding-top: 16px;
+}
+
+/* --- Header: Greeting + Quote --- */
+.dash-header {
+    display: flex;
+    flex-direction: column;
+    /* Centered over the centered composer below, so the greeting and
+       the "Ask Anjadhe" card read as one hero moment on one axis.
+       Whitespace does the separating — no hairline. */
+    align-items: center;
+    text-align: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding-top: var(--space-lg);
+}
+
+/* Welcome / Getting Started */
+.dash-welcome {
+    margin-bottom: var(--space-2xl);
+}
+
+.dash-welcome-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.dash-welcome-footer {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+    text-align: center;
+}
+
+.dash-welcome-footer-tagline {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin: 0;
+}
+
+.dash-welcome-footer-source {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin: var(--space-xs) 0 0;
+}
+
+.dash-welcome-footer-source a {
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.dash-welcome-footer-source a:hover {
+    color: var(--color-text);
+}
+
+/* Mission */
+.dash-welcome-mission {
+    text-align: center;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: var(--space-2xl);
+}
+
+.dash-welcome-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    margin: 0 0 var(--space-md);
+    line-height: 1.4;
+}
+
+.dash-welcome-mission-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* About view hero — mirrors the website hero layout: app icon on the
+ * left, content (kicker + big headline + two paragraphs) on the right.
+ * Stacks vertically at narrow window widths.
+ */
+.about-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xl);
+    padding: var(--space-xl) 0;
+}
+
+.about-hero-logo {
+    flex-shrink: 0;
+}
+
+.about-hero-logo img {
+    width: 72px;
+    height: 72px;
+    display: block;
+    border-radius: var(--radius-md);
+}
+
+.about-hero-content {
+    flex: 1;
+    min-width: 0;
+    /* Match the other sections' width — the old 62ch column left the hero
+       visibly narrower than the rest of the page. Long-line readability is
+       handled per-paragraph below instead. */
+    text-align: left;
+}
+
+.about-hero-lead,
+.about-hero-secondary,
+.about-hero-proof {
+    max-width: 78ch;
+    line-height: 1.75;
+}
+
+/* Hero claim pills — one per line, never broken mid-phrase */
+.about-hero-pills {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    margin: 0 0 var(--space-md);
+}
+
+.about-hero-pill {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+.about-hero-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    margin: 0 0 var(--space-lg);
+    max-width: 22ch;
+}
+
+.about-hero-lead {
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-md);
+}
+
+.about-hero-proof {
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-left: 2px solid var(--color-text);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+}
+
+.about-hero-secondary {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-text-tertiary);
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .about-hero {
+        flex-direction: column;
+        gap: var(--space-lg);
+        padding: var(--space-lg) 0;
+    }
+}
+
+/* "Closed Alpha" pill in the About header — opens an info modal */
+.about-alpha-pill {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-bg);
+    background: var(--color-text);
+    border: none;
+    border-radius: 999px;
+    padding: 4px 12px;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.about-alpha-pill:hover {
+    opacity: 0.8;
+}
+
+.about-alpha-modal .modal-body {
+    max-width: 52ch;
+}
+
+.about-alpha-modal .modal-body p {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-md);
+}
+
+.about-alpha-modal .modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Section headers */
+.dash-welcome-section-header {
+    margin-bottom: var(--space-lg);
+}
+
+.dash-welcome-section-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin: 0 0 var(--space-xs);
+}
+
+.dash-welcome-section-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.75;
+}
+
+/* Framework (Focus > Goals > Tasks) */
+.dash-welcome-framework {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+}
+
+.dash-welcome-framework-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dash-welcome-framework-step:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-hover);
+}
+
+/* Header row: number badge + title, with the description spanning the
+   full card width below it. */
+.dash-welcome-framework-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.dash-welcome-framework-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dash-welcome-framework-step h4 {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin: 0;
+}
+
+.dash-welcome-framework-step p {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.65;
+}
+
+.dash-welcome-framework-arrow {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xl);
+    padding-top: var(--space-lg);
+    flex-shrink: 0;
+}
+
+.dash-welcome-framework-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin-top: var(--space-md);
+    text-align: left;
+}
+
+/* Card grids */
+.dash-welcome-grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.dash-welcome-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.dash-welcome-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+.dash-welcome-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    cursor: pointer;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dash-welcome-card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-hover);
+}
+
+.dash-welcome-card-icon {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-sm);
+}
+
+.dash-welcome-card h4 {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin: 0 0 var(--space-xs);
+}
+
+.dash-welcome-card p {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.65;
+}
+
+@media (max-width: 768px) {
+    .dash-welcome-framework {
+        flex-direction: column;
+    }
+    .dash-welcome-framework-arrow {
+        transform: rotate(90deg);
+        padding: 0;
+        text-align: center;
+    }
+    .dash-welcome-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .dash-welcome-grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .dash-welcome-grid-3 { grid-template-columns: 1fr; }
+}
+
+.dash-greeting {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 300;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.dash-date-line {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin: var(--space-xs) 0 0;
+    letter-spacing: 0.03em;
+}
+
+.dash-quote {
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    line-height: 1.5;
+    text-align: left;
+}
+
+.dash-quote-author {
+    display: block;
+    font-style: normal;
+    font-size: var(--text-xs);
+    margin-top: var(--space-xs);
+    color: var(--color-text-tertiary);
+    opacity: 0.7;
+}
+
+/* Section title shared by home panes (the Feed header uses it). */
+.dash-panel-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+/* --- Ask Anjadhe input on dashboard --- */
+
+/* The hero is just a width-capping wrapper now — the nested .agent-composer
+   (css/apps/agent.css) carries the whole card design, so home and the
+   assistant page share one composer, byte for byte. */
+.dash-agent-hero {
+    /* Don't stretch the full ~1500px dashboard width — that makes the
+       textarea feel like a search-engine homepage. Cap the readable line
+       length and center it. */
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto var(--space-lg);
+}
+
+/* Home is the hero surface — lift the shared card slightly above the
+   in-chat composer's resting weight. */
+.dash-agent-hero .agent-composer {
+    padding: 14px 14px 10px;
+    box-shadow: var(--shadow-md);
+}
+
+.dash-agent-hero .agent-composer:focus-within {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Same breathing room as the Assistant's fresh-chat composer. */
+.dash-agent-hero #dash-agent-input {
+    min-height: 44px;
+}
+
+/* Match the Assistant header capsule: while things are fine the state word
+   is redundant — the dot (and its tooltip) carry it. The word reappears
+   for warming/preparing/offline, which the user should actually read. */
+.dash-agent-hero .agent-readiness[data-state="ready"] .agent-readiness-text,
+.dash-agent-hero .agent-readiness[data-state="idle"] .agent-readiness-text {
+    display: none;
+}
+
+/* Gentle rise on arrival — the one orchestrated motion moment on home.
+   Replays when the dashboard view re-activates (display none → block). */
+@media (prefers-reduced-motion: no-preference) {
+    #dashboard-view.active .dash-header {
+        animation: dashHeroRise 260ms cubic-bezier(0.2, 0, 0, 1) both;
+    }
+    #dashboard-view.active .dash-agent-hero {
+        animation: dashHeroRise 320ms cubic-bezier(0.2, 0, 0, 1) both;
+    }
+}
+
+@keyframes dashHeroRise {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Announcements on dashboard --- */
+
+.dash-announcements {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.dash-announcement {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+}
+
+.dash-announcement-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dash-announcement-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.dash-announcement-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.dash-announcement-link {
+    display: inline-block;
+    margin-top: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+.dash-announcement-close {
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    line-height: 1;
+    padding: var(--space-xs) var(--space-sm);
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.dash-announcement-close:hover {
+    color: var(--color-text);
+}
+
+/* --- Journal nudge on dashboard --- */
+
+.dash-journal-nudge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+}
+
+.dash-journal-nudge-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.dash-journal-nudge-btn {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    background: var(--color-text);
+    color: var(--color-bg);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.dash-journal-nudge-btn:hover {
+    opacity: 0.85;
+}
+
+/* --- First-run welcome card. Machine-local, dismissible. --- */
+.dash-firstrun {
+    position: relative;
+    padding: var(--space-lg) var(--space-xl);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.dash-firstrun-dismiss {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-md);
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xl);
+    line-height: 1;
+    cursor: pointer;
+    padding: var(--space-xs);
+    transition: color var(--transition-fast);
+}
+
+.dash-firstrun-dismiss:hover {
+    color: var(--color-text);
+}
+
+.dash-firstrun-kicker {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-tertiary);
+    margin: 0 0 var(--space-sm);
+}
+
+.dash-firstrun-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 300;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+}
+
+.dash-firstrun-body {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-md);
+    max-width: 62ch;
+}
+
+.dash-firstrun .primary-btn {
+    margin-top: var(--space-xs);
+}
+
+/* --- Tabbed home: Apps tab + Widgets tab.
+   The mainstage is a single-pane container; only one tab pane is
+   visible at a time. Tab bar lives just above. */
+
+.dash-tabs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+/* Apps / Widgets / Feed — the same bordered pill capsule as the Actions
+   hub strip and the Assistant's status capsule. */
+.dash-tabs-strip {
+    display: flex;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    padding: 3px;
+}
+
+.dash-tab {
+    background: transparent;
+    border: 0;
+    padding: 4px 14px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.dash-tab:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.dash-tab.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.dash-customize-apps-btn {
+    margin-left: auto;
+    align-self: center;
+    background: transparent;
+    border: 0;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: 999px;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.dash-customize-apps-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* --- Prompt Feed (Home → Feed tab) --- */
+.dash-feed-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.dash-feed-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+/* Feed controls share the pill geometry of the rest of the header chrome. */
+.dash-feed-actions .primary-btn,
+.dash-feed-actions .secondary-btn {
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+/* ---- Manage prompts modal (Feed → Configure / New prompt) ----
+   Styled to match the AI Assistant's surfaces: soft-shadow cards, pill
+   controls, and a composer-style prompt field with option chips. */
+dialog.modal.prompt-mgr-dialog { max-width: 620px; }
+.prompt-mgr-dialog .modal-body { padding-top: var(--space-sm); }
+
+.prompt-mgr-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    min-height: 34px;
+}
+
+.prompt-mgr-subtitle {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.prompt-mgr-count {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+}
+
+/* "+ New prompt" sits at the right edge of the list head, as a pill like
+   the feed-header actions above the modal. */
+.prompt-mgr-head .prompt-mgr-add {
+    margin-left: auto;
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+/* Circular ghost back button (form view). */
+.prompt-mgr-back {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+.prompt-mgr-back:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+
+/* Breathing room on the edges so row hover shadows don't clip against the
+   scroll container. */
+.prompt-mgr-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    max-height: 56vh;
+    overflow-y: auto;
+    padding: 2px;
+    margin: -2px;
+}
+
+.prompt-mgr-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl) var(--space-lg);
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.prompt-mgr-empty-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+}
+
+.prompt-mgr-empty-text {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.prompt-mgr-empty-add { border-radius: 999px; padding: 8px 20px; }
+
+.prompt-mgr-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.prompt-mgr-row:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Leading glyph badge — same voice as the home app tiles. */
+.prompt-mgr-row-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.prompt-mgr-row-main { min-width: 0; flex: 1; }
+
+.prompt-mgr-row-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.prompt-mgr-row-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.prompt-mgr-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.prompt-mgr-row-ran {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Row actions stay quiet until the row is engaged. */
+.prompt-mgr-row-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity var(--transition-fast);
+}
+.prompt-mgr-row:hover .prompt-mgr-row-actions,
+.prompt-mgr-row:focus-within .prompt-mgr-row-actions { opacity: 1; }
+
+.prompt-mgr-run {
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 4px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+.prompt-mgr-run:hover {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+}
+.prompt-mgr-run:disabled { opacity: 0.5; cursor: default; }
+
+.prompt-mgr-iconbtn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: var(--text-sm);
+    line-height: 1;
+    transition: all var(--transition-fast);
+}
+.prompt-mgr-iconbtn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+.prompt-mgr-iconbtn.prompt-mgr-del:hover { color: #dc2626; }
+
+/* ---- form ---- */
+.prompt-mgr-form { display: flex; flex-direction: column; }
+
+.prompt-mgr-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.prompt-mgr-input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: var(--space-lg);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.prompt-mgr-input:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* The prompt body lives in a composer card — the same surface treatment as
+   the AI Assistant's input: soft shadow, lifts on focus, option chips on a
+   footer row inside the card. */
+.prompt-mgr-composer {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    padding: 6px 8px 8px;
+    margin-bottom: var(--space-lg);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.prompt-mgr-composer:focus-within {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.prompt-mgr-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    color: var(--color-text);
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: vertical;
+    min-height: 110px;
+    padding: 6px 6px 4px;
+    line-height: 1.55;
+}
+
+.prompt-mgr-composer-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 8px 4px 0;
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* Option chips: hidden checkbox + pill label; checked inverts, mirroring
+   the theme's interactive-accent rule (auto-inverts in dark mode). */
+.prompt-mgr-optchip { position: relative; display: inline-flex; }
+.prompt-mgr-optchip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.prompt-mgr-optchip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    padding: 4px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+.prompt-mgr-optchip span:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+.prompt-mgr-optchip input:checked + span {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+}
+.prompt-mgr-optchip input:focus-visible + span {
+    outline: 2px solid var(--color-border-hover);
+    outline-offset: 1px;
+}
+
+/* Segmented schedule control — pill track, inverted active segment. */
+.prompt-mgr-seg {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+}
+
+.prompt-mgr-seg-btn {
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 5px 14px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+.prompt-mgr-seg-btn:hover { color: var(--color-text); }
+.prompt-mgr-seg-btn.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Optional run time for daily/weekly schedules — sits under the segmented
+   control; hidden entirely for duration-only intervals (hourly/6h). */
+.prompt-mgr-time-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+.prompt-mgr-time-row .prompt-mgr-label { margin-bottom: 0; }
+.prompt-mgr-time-row .prompt-mgr-time {
+    width: auto;
+    padding: 5px 10px;
+    margin-bottom: 0;
+    font-size: var(--text-xs);
+}
+
+.prompt-mgr-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin: var(--space-sm) 0 var(--space-lg);
+}
+
+.prompt-mgr-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border-light);
+}
+.prompt-mgr-form-actions .primary-btn,
+.prompt-mgr-form-actions .secondary-btn {
+    border-radius: 999px;
+    padding: 8px 20px;
+}
+
+/* Digest-card feed (Home → Feed tab). Each scheduled-prompt run is a
+   cleanly separated card so the tab reads as a browsable feed: the prompt
+   acts as a source label, a timestamp sits opposite it, and the output
+   renders as article-style prose matching the AI Assistant. */
+.prompt-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.feed-card {
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    padding: var(--space-lg);
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.feed-card--error {
+    border-color: #dc2626;
+}
+
+.feed-card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+/* Prompt title rendered as a source chip — the "channel" this result
+   came from. Kept small and quiet so the output itself leads. */
+.feed-card-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 2px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 65%;
+}
+
+/* Timestamp (and model) pushed opposite the source chip. */
+.feed-card-meta {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+/* Delete control stays out of the way until the entry is hovered. */
+.feed-card-del {
+    background: transparent;
+    border: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-lg);
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 var(--space-xs);
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.feed-card:hover .feed-card-del,
+.feed-card-del:focus-visible {
+    opacity: 1;
+}
+
+.feed-card-del:hover {
+    color: var(--color-text);
+}
+
+.feed-card-error {
+    color: #dc2626;
+    font-size: var(--text-sm);
+}
+
+/* Rendered-markdown body — article-style prose mirroring agent.css's
+   updated .agent-bubble block styles so feed content matches the AI
+   Assistant's doc-style formatting. */
+.feed-card-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    letter-spacing: -0.003em;
+    color: var(--color-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+}
+
+.feed-card-body p {
+    margin: 0 0 var(--space-md);
+}
+
+.feed-card-body p:last-child {
+    margin-bottom: 0;
+}
+
+.feed-card-body ul,
+.feed-card-body ol {
+    margin: var(--space-sm) 0 var(--space-md);
+    padding-left: 1.5rem;
+}
+
+.feed-card-body li {
+    margin: var(--space-xs) 0;
+}
+
+.feed-card-body li > p {
+    margin-bottom: var(--space-xs);
+}
+
+.feed-card-body h2,
+.feed-card-body h3,
+.feed-card-body h4,
+.feed-card-body h5 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.3;
+    margin: var(--space-lg) 0 var(--space-xs);
+    color: var(--color-text);
+}
+
+.feed-card-body h2 { font-size: var(--text-base); }
+.feed-card-body h3 { font-size: var(--text-sm); }
+.feed-card-body h4 { font-size: var(--text-sm); }
+.feed-card-body h5 {
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+}
+
+.feed-card-body h2:first-child,
+.feed-card-body h3:first-child,
+.feed-card-body h4:first-child,
+.feed-card-body h5:first-child {
+    margin-top: 0;
+}
+
+.feed-card-body code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light, var(--color-border));
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
+}
+
+.feed-card-body hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-lg) 0;
+}
+
+.feed-card-body table {
+    border-collapse: collapse;
+    margin: var(--space-md) 0;
+    font-size: var(--text-sm);
+    width: 100%;
+}
+
+.feed-card-body th,
+.feed-card-body td {
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.feed-card-body th {
+    background: var(--color-surface);
+    font-weight: 600;
+}
+
+.feed-card-body a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+
+.feed-card-body a:hover {
+    opacity: 0.7;
+}
+
+/* Content cards open into a full-page post on click. */
+.feed-card[data-feed-open] {
+    cursor: pointer;
+}
+
+/* Preview clamp — show a fixed slice that fades out at the bottom. The
+   mask keeps the fade theme-agnostic (no hardcoded background colour). */
+.feed-card-body--clamped {
+    max-height: 13rem;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+}
+
+/* "Read more" as a quiet bordered pill — a visible door into the full
+   post rather than bare bold text. */
+.feed-card-more {
+    margin-top: var(--space-sm);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-card-more:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text);
+}
+
+/* --- Full-page feed post (social-media style detail view) --- */
+/* Sits below the fixed 38px app titlebar (and under its z-index) and to
+   the RIGHT of the global nav rail, so both stay visible and usable
+   while reading. Posts only open from home, where the rail is expanded;
+   AppManager.openApp closes the post if the user navigates away. */
+.feed-post-overlay {
+    position: fixed;
+    top: 38px;
+    left: 216px;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    background: var(--color-bg);
+    overflow-y: auto;
+    animation: feedPostIn var(--transition-base) ease;
+}
+
+@media (max-width: 768px) {
+    .feed-post-overlay {
+        left: 68px;
+    }
+}
+
+.feed-post-overlay[hidden] {
+    display: none;
+}
+
+/* Focused programmatically on open (so Escape/tab land inside) — the
+   container itself should never paint a focus ring. */
+.feed-post-overlay:focus {
+    outline: none;
+}
+
+@keyframes feedPostIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* A focused reading column, not the full feed-grid width. Matches the AI
+   Assistant's message column (760px) since the body mirrors its doc-style
+   markdown — keeps line length comfortable (~70ch) instead of stretching
+   prose the full page width. */
+.feed-post-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--space-lg) var(--space-xl) var(--space-2xl);
+}
+
+/* Back control reads as the first element of the page, not a fixed bar. */
+/* A real button, not a bare link — same quiet-bordered voice as the
+   secondary controls elsewhere. */
+.feed-post-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--space-xl);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 6px 14px;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-post-back:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+}
+
+.feed-post-back:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text);
+}
+
+/* Article-style header: eyebrow → headline → quiet meta line. Replaces the
+   old single cramped row (chip + time + button) so the post opens with a
+   proper title, not a tiny label. */
+.feed-post-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Eyebrow above the headline — quiet category label, not a boxed chip. */
+.feed-post-source {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.feed-post-title {
+    margin: 0 0 var(--space-sm);
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+}
+
+.feed-post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Meta-line link from a feed post back to the prompt note that made it */
+.feed-post-prompt-link {
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--color-text-tertiary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.feed-post-prompt-link:hover {
+    color: var(--color-text);
+}
+
+.feed-post-prompt-link[hidden] {
+    display: none;
+}
+
+.feed-post-time {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+}
+
+/* Full-page post body inherits the shared .feed-card-body scale unchanged —
+   cards and the detail page deliberately read at the same size. */
+
+/* "Ask about this result" — floating bottom-right pill, mirroring the
+   app-wide #agent-context-cta so the assistant hand-off lives in the same
+   place across the app instead of cramped into the post header. Lives inside
+   the overlay, so it hides with the post. */
+.feed-post-discuss {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 95;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.feed-post-discuss:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
+.feed-post-discuss:active {
+    transform: translateY(0);
+}
+
+.feed-post-discuss[hidden] {
+    display: none;
+}
+
+.feed-post-discuss-icon {
+    font-size: 14px;
+}
+
+/* --- Customize home apps modal --- */
+.app-visibility-group {
+    margin-bottom: var(--space-lg);
+}
+
+.app-visibility-group:last-child {
+    margin-bottom: 0;
+}
+
+.app-visibility-group-label {
+    margin: 0 0 var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.app-visibility-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.app-visibility-row:hover {
+    background: var(--color-surface-hover);
+}
+
+.app-visibility-fav {
+    flex-shrink: 0;
+    border: 0;
+    background: none;
+    padding: var(--space-xs);
+    font-size: var(--text-lg);
+    line-height: 1;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.app-visibility-fav:hover {
+    color: var(--color-text-secondary);
+}
+
+.app-visibility-fav.is-fav {
+    color: var(--color-text);
+}
+
+.app-visibility-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex: 1;
+    min-width: 0;
+}
+
+.app-visibility-row-icon {
+    width: 1.5rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-visibility-row-icon svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.app-visibility-row-label {
+    flex: 1;
+    font-size: var(--text-base);
+    color: var(--color-text);
+}
+
+.app-visibility-row-check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-text);
+    cursor: pointer;
+}
+
+/* ===================================
+   Home shell: left app nav + feed main stage
+   =================================== */
+
+#dashboard-view.active {
+    height: calc(100vh - 38px);
+    overflow: hidden;
+}
+
+.dash-shell {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: 100%;
+    width: 100%;
+}
+
+/* Global rail — fixed under the titlebar, on every page. #app-views
+   carries the matching margin-left. Expanded on home; everywhere else
+   body.nav-collapsed narrows it to icons (below). */
+.dash-nav {
+    position: fixed;
+    left: 0;
+    top: 38px;
+    bottom: 0;
+    width: 216px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border-right: 1px solid var(--color-border);
+    background: var(--color-bg);
+    /* Side padding chosen so a 26px icon plate sits dead-center in the
+       68px collapsed rail (13 + 8 tile pad + 13 = 34). Constant across
+       states so icons never shift during the width animation. */
+    padding: var(--space-md) 13px;
+    overflow-x: hidden;
+    transition: width var(--transition-slow), box-shadow var(--transition-slow);
+}
+
+#app-views {
+    transition: margin-left var(--transition-slow);
+}
+
+/* ---- Auto-collapse (any page but home, when width is scarce) ----
+   The rail narrows to a 68px icon strip: text FADES but keeps its box,
+   so icons never move and the width animation just clips. Hovering the
+   strip flies the full rail open OVER the page (content margin stays at
+   68px — nothing reflows). Hover intent lives in JS — mouseenter/leave
+   timers toggle .is-peek (see AppManager.setupDashboardTabs) — so the
+   width animation itself always starts immediately and runs one smooth
+   curve, never delay-then-snap.
+   Gated on window width: JS sets body.nav-collapsed on every sub-app
+   page regardless, but at ≥1200px there's room to spare, so the rail
+   simply stays expanded and these rules never bite. Resizing across
+   the threshold animates via the existing width transition. */
+
+@media (max-width: 1199.98px) {
+    body.nav-collapsed #app-views {
+        margin-left: 68px;
+    }
+
+    body.nav-collapsed .dash-nav {
+        width: 68px;
+    }
+
+    body.nav-collapsed .dash-nav.is-peek {
+        width: 216px;
+        /* Stronger than --shadow-lg: the flyout floats OVER page content,
+           so it needs unmistakable elevation (border still separates in
+           dark). */
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.10);
+    }
+}
+
+.dash-nav .dash-app-tile-label,
+.dash-nav .dash-apps-group-label,
+.dash-nav .dash-app-tile-badge,
+.dash-nav .dash-app-tile-lockbadge,
+.dash-nav-feed-label,
+.dash-nav-foot {
+    transition: opacity var(--transition-base);
+}
+
+@media (max-width: 1199.98px) {
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-app-tile-label,
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-apps-group-label,
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-app-tile-badge,
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-app-tile-lockbadge,
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-nav-feed-label,
+    body.nav-collapsed .dash-nav:not(.is-peek) .dash-nav-foot {
+        opacity: 0;
+    }
+}
+
+/* ---- Manual minimize (user choice, persisted) ----
+   The unconditional twin of the width-gated auto-collapse above: same
+   68px icon strip, same peek flyout, but on EVERY page at EVERY width —
+   the user asked for it via the rail's chevron toggle, and the choice is
+   remembered (StorageManager 'nav-minimized', applied at boot). */
+
+body.nav-minimized #app-views {
+    margin-left: 68px;
+}
+
+body.nav-minimized .dash-nav {
+    width: 68px;
+}
+
+body.nav-minimized .dash-nav.is-peek {
+    width: 216px;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.10);
+}
+
+body.nav-minimized .dash-nav:not(.is-peek) .dash-app-tile-label,
+body.nav-minimized .dash-nav:not(.is-peek) .dash-apps-group-label,
+body.nav-minimized .dash-nav:not(.is-peek) .dash-app-tile-badge,
+body.nav-minimized .dash-nav:not(.is-peek) .dash-app-tile-lockbadge,
+body.nav-minimized .dash-nav:not(.is-peek) .dash-nav-feed-label,
+body.nav-minimized .dash-nav:not(.is-peek) .dash-nav-foot {
+    opacity: 0;
+}
+
+/* ---- Minimize toggle ----
+   A quiet chevron at the rail's top-right: invisible until the rail is
+   hovered, so the rail stays bookish at rest. Flips direction when
+   minimized; in the 68px strip it only appears once the peek flyout is
+   open (the strip is too narrow to share the row with the Home icon). */
+.dash-nav-min-btn {
+    position: absolute;
+    top: calc(var(--space-md) + 5px);
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    opacity: 0;
+    z-index: 2;
+    transition: opacity var(--transition-base), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dash-nav-min-btn svg {
+    width: 15px;
+    height: 15px;
+    transition: transform var(--transition-base);
+}
+
+.dash-nav:hover .dash-nav-min-btn {
+    opacity: 1;
+}
+
+.dash-nav-min-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+}
+
+body.nav-minimized .dash-nav-min-btn svg {
+    transform: rotate(180deg);
+}
+
+/* In the minimized strip the button waits for the flyout. */
+body.nav-minimized .dash-nav:not(.is-peek) .dash-nav-min-btn {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* The rail's scrollbar stays out of sight until the pointer is on the
+   rail — then a slim thumb appears. */
+.dash-nav-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.dash-nav-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+}
+
+.dash-nav:hover .dash-nav-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-border-hover);
+}
+
+/* Hidden during first-run setup — the wizard owns the whole window. */
+body.in-setup .dash-nav {
+    display: none;
+}
+
+body.in-setup #app-views {
+    margin-left: 0;
+}
+
+/* The Feed item — navigates home; highlighted there like an app row. */
+.dash-nav-feed {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: var(--space-md);
+    transition: background var(--transition-fast);
+}
+
+.dash-nav-feed:hover {
+    background: var(--color-surface-hover);
+}
+
+.dash-nav-feed.is-current {
+    background: var(--color-surface);
+}
+
+.dash-nav-feed:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+/* Same plate treatment as the app rows' icons (size, radius, surface,
+   border weight) so the Home icon reads as one of the set — especially
+   in the collapsed rail, where the plates carry all the recognition. */
+.dash-nav-feed-icon {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.dash-nav-feed-icon svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.dash-nav-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    /* Keep focus rings inside the scroll box from clipping. */
+    padding: 2px;
+    margin: -2px;
+}
+
+.dash-nav-foot {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: var(--space-sm);
+}
+
+/* Main column — the feed page. Scrolls independently of the nav. */
+.dash-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* ---- Nav-scoped tile overrides ----
+   The apps markup keeps its grid-era classes (AppManager's favourites /
+   hidden / lock / badge logic targets them) but lays out as quiet nav
+   rows inside .dash-nav. */
+
+.dash-nav .dash-apps-section {
+    display: block;
+}
+
+.dash-nav .dash-apps-group {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: var(--space-md);
+}
+
+.dash-nav .dash-apps-group-label {
+    margin: 0 0 4px;
+    padding: 0 8px;
+    /* One line ALWAYS: in the collapsed rail the eyebrow is invisible
+       (opacity) but keeps its box — if it wrapped at 68px, groups would
+       be taller collapsed than expanded and rows would jump on peek. */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.dash-nav .dash-apps-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.dash-nav .dash-app-tile {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 0;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.dash-nav .dash-app-tile:hover {
+    transform: none;
+    background: var(--color-surface-hover);
+}
+
+.dash-nav .dash-app-tile:active {
+    transform: none;
+}
+
+/* The app the user is currently in. */
+.dash-nav .dash-app-tile.is-current {
+    background: var(--color-surface);
+}
+
+.dash-nav .dash-app-tile.is-current .dash-app-tile-label {
+    color: var(--color-text);
+}
+
+.dash-nav .dash-app-tile-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+
+.dash-nav .dash-app-tile-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.dash-nav .dash-app-tile-label {
+    font-size: 0.8125rem;
+    text-align: left;
+    flex: 1 1 auto;
+}
+
+/* Badges pinned to the icon plate in the grid trail the row here. */
+.dash-nav .dash-app-tile-badge {
+    position: static;
+    margin-left: auto;
+    flex: 0 0 auto;
+}
+
+.dash-nav .dash-app-tile-lockbadge {
+    position: static;
+    margin-left: auto;
+    flex: 0 0 auto;
+    top: auto;
+    right: auto;
+}
+
+/* Footer controls left-align and fill the rail (their grid-era styles
+   pushed them right inside the tabs row). One line always — same
+   no-reflow rule as the group eyebrows. */
+.dash-nav-foot .dash-customize-apps-btn,
+.dash-nav-foot .dash-locked-lock-btn {
+    margin-left: 0;
+    align-self: stretch;
+    text-align: left;
+    font-size: var(--text-xs);
+    border-radius: var(--radius-sm);
+    padding: 5px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.dash-nav-foot .dash-locked-lock-btn {
+    border: none;
+    background: transparent;
+}
+
+.dash-nav-foot .dash-locked-lock-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+/* Posts published by Anjadhe (remote-config feedPosts) — same card, a
+   quiet provenance chip in the head. */
+.feed-card-source {
+    flex: 0 0 auto;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+/* Narrow windows: the rail stays icon-only on every page (home included),
+   with the same peek flyout as the sub-app collapse. */
+@media (max-width: 768px) {
+    #app-views,
+    body.nav-collapsed #app-views {
+        margin-left: 68px;
+    }
+    .dash-nav,
+    body.nav-collapsed .dash-nav {
+        width: 68px;
+    }
+    .dash-nav.is-peek,
+    body.nav-collapsed .dash-nav.is-peek {
+        width: 216px;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.10);
+    }
+    .dash-nav:not(.is-peek) .dash-app-tile-label,
+    .dash-nav:not(.is-peek) .dash-apps-group-label,
+    .dash-nav:not(.is-peek) .dash-app-tile-badge,
+    .dash-nav:not(.is-peek) .dash-app-tile-lockbadge,
+    .dash-nav:not(.is-peek) .dash-nav-feed-label,
+    .dash-nav:not(.is-peek) .dash-nav-foot {
+        opacity: 0;
+    }
+}
+
+/* Apps section ------------------------------------------------- */
+
+.dash-apps-section {
+    /* Small task-based groups (Do / Stay on top / Capture / Money / …)
+       flow left-to-right and wrap by their actual width, so the launcher
+       reads as one line of labelled clusters on a wide window instead of
+       a tall stack of near-empty rows. Full-width groups (Favourites,
+       Locked, System) opt out via flex-basis overrides below. */
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: var(--space-lg) var(--space-xl);
+}
+
+.dash-apps-group {
+    /* Soft group panel — a faint surface tint zones each category
+       (label lives inside the panel) without the border patchwork of
+       full card chrome. Tiles stay chromeless; their icon plates sit
+       on --color-bg so they pop against the tint. */
+    padding: var(--space-md) var(--space-md) var(--space-sm);
+    border: none;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+}
+
+/* "System" — Settings/Help/About close the list on their own full row,
+   as a quiet panel like every other group. */
+.dash-apps-group--more {
+    flex: 0 0 100%;
+}
+
+/* Recent apps owns its own row above the categorized groups so it
+   reads as a separate surface, not a sibling of "Plan". */
+.dash-apps-group--favorite {
+    flex: 0 0 100%;
+}
+
+/* Locked apps owns a full row like Favourites, with a header that carries
+   the "Lock now" control on the right. */
+.dash-apps-group--locked {
+    flex: 0 0 100%;
+}
+
+/* User-built apps (docs/PLATFORM.md) own a full row so they read as
+   their own section, not a tail on "Web & builders". */
+#dash-user-apps-group {
+    flex: 0 0 100%;
+}
+
+.dash-apps-group-headrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+.dash-apps-group-headrow .dash-apps-group-label {
+    margin-bottom: var(--space-sm);
+}
+
+.dash-locked-lock-btn {
+    /* Sits at the right of the tabs row, just before Customize, and only
+       while the sensitive group is unlocked. */
+    margin-left: auto;
+    align-self: center;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    border-radius: 999px;
+    padding: 3px 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+/* When "Lock now" is present it owns the right push, so Customize just
+   trails it with the normal gap instead of jumping to the far edge. */
+.dash-locked-lock-btn:not([style*="display: none"]) + .dash-customize-apps-btn {
+    margin-left: 0;
+}
+.dash-locked-lock-btn:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+/* Lock glyph pinned to the corner of a locked tile's icon plate. */
+.dash-app-tile-lockbadge {
+    position: absolute;
+    top: 12px;
+    right: calc(50% - 28px);
+    font-size: 11px;
+    line-height: 1;
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.dash-apps-group-label {
+    /* Tiny uppercase eyebrow; same metrics as section labels in
+       Settings and elsewhere so groups read as quiet headers, not
+       page titles. */
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-tertiary);
+    margin: 0 0 var(--space-sm);
+}
+
+.dash-apps-row {
+    /* Flex row of fixed-width tiles. The row's intrinsic width is the
+       sum of its tiles + gaps, so the parent .dash-apps-section can
+       wrap groups based on actual width rather than a forced full
+       row per group. */
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.dash-app-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: var(--space-md) var(--space-sm) var(--space-sm);
+    /* Fixed width — parent .dash-apps-row is flex (not grid), so
+       tiles need an explicit width to stay consistent across groups. */
+    width: 110px;
+    min-height: 96px;
+    /* Chromeless launcher tile — the icon plate below carries the visual
+       weight, so the grid reads as one calm surface instead of a
+       patchwork of bordered boxes. */
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.dash-app-tile:hover {
+    transform: translateY(-1px);
+}
+
+.dash-app-tile:active {
+    transform: translateY(0);
+}
+
+.dash-app-tile:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+.dash-app-tile-icon {
+    /* Rounded-square icon plate. */
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 22px;
+    line-height: 1;
+    border: 1px solid var(--color-border);
+    /* Subtle per-app hue: --tile-hue (set per data-app below) blended
+       well toward the neutral grays, so the launcher reads colorful at
+       a glance but stays quiet. Tiles without a hue resolve to the
+       plain monochrome look. */
+    color: color-mix(in srgb, var(--tile-hue, var(--color-text-secondary)) 62%, var(--color-text-secondary));
+    background: color-mix(in srgb, var(--tile-hue, var(--color-bg)) 7%, var(--color-bg));
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Emoji icons (user-app manifests) can't ride currentColor — coerce
+   them into the theme instead. SVG line icons are exempt. */
+.dash-app-tile-icon:not(:has(svg)) {
+    filter: grayscale(1) contrast(1.05);
+}
+
+.dash-app-tile-icon svg {
+    width: 21px;
+    height: 21px;
+    display: block;
+}
+
+.dash-app-tile:hover .dash-app-tile-icon {
+    color: color-mix(in srgb, var(--tile-hue, var(--color-text)) 75%, var(--color-text));
+    background: color-mix(in srgb, var(--tile-hue, var(--color-surface-hover)) 12%, var(--color-surface-hover));
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Per-app hues — drawn from the focus-area palette plus the app's own
+   semantic colors, one hue per tile. Utility tiles (Settings, Help,
+   About) stay neutral on purpose: color marks content, not chrome. */
+.dash-app-tile[data-app="actions"]   { --tile-hue: #7CB342; }
+.dash-app-tile[data-app="agent"]     { --tile-hue: #AB47BC; }
+.dash-app-tile[data-app="email"]     { --tile-hue: #4A90A4; }
+.dash-app-tile[data-app="calendar"]  { --tile-hue: #dc2626; }
+.dash-app-tile[data-app="notes"]     { --tile-hue: #d97706; }
+.dash-app-tile[data-app="journal"]   { --tile-hue: #EC407A; }
+.dash-app-tile[data-app="bookmarks"] { --tile-hue: #26A69A; }
+.dash-app-tile[data-app="portfolio"] { --tile-hue: #16a34a; }
+.dash-app-tile[data-app="browse"]    { --tile-hue: #5C6BC0; }
+.dash-app-tile[data-app="maker"]     { --tile-hue: #FF7043; }
+.dash-app-tile[data-app="appstudio"] { --tile-hue: #78909C; }
+
+.dash-app-tile-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+    /* Truncate "Portfolio" / "Bookmarks" gracefully if a tile shrinks. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.dash-app-tile:hover .dash-app-tile-label {
+    color: var(--color-text);
+}
+
+.dash-app-tile-badge {
+    position: absolute;
+    /* Pin to the top-right corner of the centered 48px icon plate. */
+    top: 10px;
+    right: calc(50% - 31px);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+}
+
+.dash-app-tile-badge:empty {
+    display: none;
+}
+
+/* (Titlebar Home button retired — the global nav's Feed item is the
+   way home.) */
+
+/* --- Shared preview helpers (kept for compatibility) --- */
+.preview-empty {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin: 0;
+    padding: var(--space-xs) 0;
+}
+
+.preview-more {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin: var(--space-xs) 0 0;
+}
+
+/* ===================================
+   Quotes Section
+   =================================== */
+
+/* Home Quotes (selected from Quotes app) */
+.quotes-section {
+    margin-bottom: var(--space-2xl);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.quotes-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.quote-card {
+    padding: var(--space-lg) var(--space-xl);
+    border-left: 2px solid var(--color-text);
+    background: var(--color-surface);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    position: relative;
+}
+
+.quote-text {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.quote-text::before {
+    content: '\201C';
+    font-size: var(--text-2xl);
+    color: var(--color-text-tertiary);
+    margin-right: 2px;
+}
+
+.quote-text::after {
+    content: '\201D';
+    font-size: var(--text-2xl);
+    color: var(--color-text-tertiary);
+    margin-left: 2px;
+}
+
+.quote-author {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-sm);
+    font-style: normal;
+}
+
+.quote-author::before {
+    content: '\2014\00a0';
+}
+
+/* ===================================
+   Home Notes Section
+   =================================== */
+
+.home-notes-section {
+    margin-bottom: var(--space-2xl);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.home-notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-md);
+}
+
+.home-note-card {
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.home-note-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.home-note-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+.home-note-content {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-height: 6.4em;
+    overflow: hidden;
+}
+
+.home-note-content h1,
+.home-note-content h2,
+.home-note-content h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--text-base);
+    margin: 0 0 var(--space-xs);
+    line-height: 1.4;
+}
+
+.home-note-content p {
+    margin: 0 0 var(--space-xs);
+}
+
+.home-note-content ul,
+.home-note-content ol {
+    margin: 0 0 var(--space-xs);
+    padding-left: var(--space-lg);
+}
+
+.home-note-content li {
+    margin: 0;
+}
+
+.home-note-content blockquote {
+    margin: 0 0 var(--space-xs);
+    padding-left: var(--space-md);
+    border-left: 2px solid var(--color-text-tertiary);
+    color: var(--color-text-tertiary);
+}
+
+/* ===================================
+   App Views
+   =================================== */
+
+.app-view {
+    padding: var(--space-xl);
+    padding-top: var(--space-lg);
+    /* Cap + center page content for a consistent reading width across apps.
+       Narrower per-content caps (editors, card lists) still apply inside. */
+    max-width: var(--app-content-max);
+    margin-inline: auto;
+}
+
+/* Multi-pane / full-bleed views (sidebar + list + detail, month grids,
+   split editor/preview, embedded browser) need the whole window width. */
+.app-view-full {
+    max-width: none;
+}
+
+/* Sandboxed user-app iframe (SECURITY H3). Full-bleed: the app supplies its
+   own padding via its stylesheet, so strip the .app-view centering/padding and
+   let the frame fill the content area. Titlebar is 38px. */
+.user-app-frame {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    min-height: calc(100vh - 38px);
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: var(--color-bg);
+}
+
+.app-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Whitespace separates the header from the page (matches the home
+       hero) — no hairline. */
+    margin-bottom: var(--space-xl);
+}
+
+.app-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.app-view-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    flex: 1;
+}
+
+/* Shared breadcrumb navigation — smaller than the 2xl title slot it sits in
+   so it reads as navigation, not a headline. */
+.app-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-xl);
+    /* Hard stop: whatever survives collapsing/ellipsis must not run past
+       the title slot (which ends before the centered hub strip). */
+    overflow: hidden;
+}
+
+.breadcrumb-link {
+    /* Quiet ancestor: plain tertiary text, no underline — at title scale
+       an underlined link reads as a web hyperlink, not navigation. The
+       hover pill is the affordance. */
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    white-space: nowrap;
+    font-weight: 400;
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+}
+
+
+.breadcrumb-link:hover {
+    color: var(--color-text);
+    background: var(--color-surface-hover);
+}
+
+.breadcrumb-separator {
+    color: var(--color-border-hover);
+    flex-shrink: 0;
+    font-size: 1.1em;
+    line-height: 1;
+    user-select: none;
+}
+
+.breadcrumb-current {
+    color: var(--color-text);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px var(--space-sm);
+}
+
+
+.app-toolbar {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+/* ===================================
+   Empty States
+   =================================== */
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--color-text-secondary);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: var(--space-lg);
+    opacity: 0.3;
+}
+
+/* Empty states are migrating from emoji to inline SVG line icons. */
+.empty-icon svg {
+    width: 56px;
+    height: 56px;
+    display: inline-block;
+}
+
+.empty-state h3 {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+}
+
+/* ===================================
+   Scrollbar
+   =================================== */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: var(--space-lg) var(--space-md);
+        padding-top: var(--space-md);
+    }
+
+    .dash-header {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .dash-quote {
+        text-align: left;
+        max-width: none;
+    }
+
+    .app-view {
+        padding: var(--space-md);
+    }
+}

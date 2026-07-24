@@ -1,0 +1,10 @@
+{
+    "manifestVersion": 1,
+    "id": "reading-list",
+    "name": "Reading List",
+    "icon": "&#128214;",
+    "version": "0.1.0",
+    "description": "Books I'm reading and have finished.",
+    "entry": "app.spec.json",
+    "keywords": ["book", "books", "reading"]
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "com.anjadhe.app",
+  "appName": "Anjadhe",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always"
+  }
+}

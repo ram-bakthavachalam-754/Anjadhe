@@ -1,0 +1,430 @@
+{
+  "_comment": "Cross-engine conformance corpus for the App Spec contract (js/core/app-spec.js). Language-neutral on purpose: the Mac JS validator AND the iOS native engine must both agree with every case. Each case has a name, a spec, and expect.valid; invalid cases also list errorIncludes substrings that must appear in the validation errors. Run with: npm test (node scripts/spec-conformance.js). Add a case here whenever you add or change a component.",
+  "cases": [
+    {
+      "name": "minimal paragraph",
+      "spec": { "specVersion": 1, "components": [{ "type": "paragraph", "text": "Hello." }] },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "tracker: form + record_list + computed count",
+      "spec": {
+        "specVersion": 1,
+        "title": "Books",
+        "components": [
+          { "type": "summary_grid", "items": [{ "label": "Total", "value": { "count": "books" } }] },
+          { "type": "form", "collection": "books", "fields": [
+            { "name": "title", "label": "Title", "required": true },
+            { "name": "rating", "input": "number" }
+          ] },
+          { "type": "record_list", "collection": "books", "fields": ["title", "rating"], "allowDelete": true, "sort": { "by": "rating", "dir": "desc" } }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "record_list with editFields, statusField, and detail+source",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "movies", "fields": [{ "name": "title" }] },
+          { "type": "record_list", "collection": "movies",
+            "editFields": [{ "name": "title" }],
+            "statusField": { "name": "status", "options": ["want", "watching", "done"] },
+            "detail": { "fields": ["title"], "title": "title", "source": {
+              "url": "https://example.com/movie?id={key}", "key": "title",
+              "map": { "year": "release.year" }
+            } }
+          }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "lookup against a public API",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "lookup", "collection": "places", "source": {
+            "url": "https://example.com/search?q={query}", "label": "name",
+            "fields": { "name": "name", "city": "address.city" }
+          } },
+          { "type": "record_list", "collection": "places" }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "progress with computed value/max",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "tasks", "fields": [{ "name": "title" }] },
+          { "type": "progress", "label": "Done", "value": { "count": "tasks" }, "max": 10 }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "sections nested to the max depth",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "section", "components": [
+            { "type": "section", "components": [
+              { "type": "section", "components": [
+                { "type": "paragraph", "text": "deep" }
+              ] }
+            ] }
+          ] }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+
+    {
+      "name": "summary_grid sum/avg over a numeric field",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "expenses", "fields": [{ "name": "amount", "input": "number" }] },
+          { "type": "summary_grid", "items": [
+            { "label": "Total", "value": { "sum": "expenses", "field": "amount" } },
+            { "label": "Average", "value": { "avg": "expenses", "field": "amount" } },
+            { "label": "Biggest", "value": { "max": "expenses", "field": "amount", "where": { "kind": "bill" } } }
+          ] }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "progress with a computed sum value",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "savings", "fields": [{ "name": "amount", "input": "number" }] },
+          { "type": "progress", "label": "Saved", "value": { "sum": "savings", "field": "amount" }, "max": 1000 }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "showWhen renders a component only on a condition",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "tasks", "fields": [{ "name": "title" }] },
+          { "type": "paragraph", "text": "You have open tasks.", "showWhen": { "count": "tasks", "where": { "done": false }, "op": "gt", "value": 0 } }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "sum aggregation without a field is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "expenses", "fields": [{ "name": "amount", "input": "number" }] },
+          { "type": "summary_grid", "items": [{ "label": "Total", "value": { "sum": "expenses" } }] }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["needs a numeric \"field\""] }
+    },
+    {
+      "name": "computed value with two aggregations is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "x", "fields": [{ "name": "amount", "input": "number" }] },
+          { "type": "summary_grid", "items": [{ "label": "X", "value": { "count": "x", "sum": "x" } }] }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["must have exactly one of"] }
+    },
+    {
+      "name": "showWhen with an unknown op is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "tasks", "fields": [{ "name": "title" }] },
+          { "type": "paragraph", "text": "hi", "showWhen": { "count": "tasks", "op": "between", "value": 0 } }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["showWhen.op must be one of"] }
+    },
+    {
+      "name": "showWhen value must be a number",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "tasks", "fields": [{ "name": "title" }] },
+          { "type": "paragraph", "text": "hi", "showWhen": { "count": "tasks", "op": "gt", "value": "0" } }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["showWhen.value must be a number"] }
+    },
+    {
+      "name": "showWhen over an undeclared collection is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "paragraph", "text": "hi", "showWhen": { "count": "ghosts", "op": "gt", "value": 0 } }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["must exactly match a collection"] }
+    },
+    {
+      "name": "layout components (card, divider, columns, tabs) nest content",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "card", "title": "Summary", "components": [
+            { "type": "paragraph", "text": "inside a card" },
+            { "type": "divider" }
+          ] },
+          { "type": "columns", "count": 2, "components": [
+            { "type": "paragraph", "text": "left" },
+            { "type": "paragraph", "text": "right" }
+          ] },
+          { "type": "tabs", "tabs": [
+            { "label": "One", "components": [{ "type": "paragraph", "text": "first" }] },
+            { "label": "Two", "components": [{ "type": "paragraph", "text": "second" }] }
+          ] }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "columns count out of range is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "columns", "count": 5, "components": [{ "type": "paragraph", "text": "x" }] }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["count must be an integer from 2 to 4"] }
+    },
+    {
+      "name": "tabs without a tabs array is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "tabs" }] },
+      "expect": { "valid": false, "errorIncludes": ["tabs must be a non-empty array"] }
+    },
+    {
+      "name": "a tab without a label is rejected",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "tabs", "tabs": [{ "components": [{ "type": "paragraph", "text": "x" }] }] }
+        ]
+      },
+      "expect": { "valid": false, "errorIncludes": ["each tab needs a label"] }
+    },
+    {
+      "name": "display components (stat, badge, key_value, gauge, timeline)",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "workouts", "fields": [{ "name": "minutes", "input": "number" }] },
+          { "type": "stat", "label": "Sessions", "value": { "count": "workouts" }, "caption": "this month" },
+          { "type": "badge", "text": "On track", "tone": "success" },
+          { "type": "key_value", "title": "Totals", "items": [
+            { "label": "Sessions", "value": { "count": "workouts" } },
+            { "label": "Minutes", "value": { "sum": "workouts", "field": "minutes" } },
+            { "label": "Goal", "value": "30 sessions" }
+          ] },
+          { "type": "gauge", "label": "Goal", "value": { "count": "workouts" }, "max": 30 },
+          { "type": "timeline", "title": "Recent", "items": [
+            { "label": "Started", "time": "Mon", "detail": "first session" },
+            { "label": "Milestone", "time": "Fri" }
+          ] }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "stat value must be a string, number, or aggregation",
+      "spec": { "specVersion": 1, "components": [{ "type": "stat", "label": "X", "value": true }] },
+      "expect": { "valid": false, "errorIncludes": ["value must be a string, number, or a computed aggregation"] }
+    },
+    {
+      "name": "badge tone must be a known tone",
+      "spec": { "specVersion": 1, "components": [{ "type": "badge", "text": "Hi", "tone": "blue" }] },
+      "expect": { "valid": false, "errorIncludes": ["tone must be neutral, success, warning, danger"] }
+    },
+    {
+      "name": "gauge without a max is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "gauge", "label": "G", "value": 5 }] },
+      "expect": { "valid": false, "errorIncludes": ["needs value and max"] }
+    },
+    {
+      "name": "counter app: buttons mutate a singleton, stat reads it, no form needed",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "stat", "label": "Count", "value": { "sum": "counter", "field": "count" } },
+          { "type": "button", "label": "+1", "action": { "verb": "increment", "collection": "counter", "field": "count" } },
+          { "type": "button", "label": "-1", "action": { "verb": "increment", "collection": "counter", "field": "count", "by": -1 } },
+          { "type": "button", "label": "Reset", "tone": "danger", "action": { "verb": "clear_collection", "collection": "counter" } }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "navigate, quick-add, set_field, and open_url buttons",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "logs", "fields": [{ "name": "note" }] },
+          { "type": "button", "label": "Quick add", "action": { "verb": "add_record", "collection": "logs", "values": { "note": "quick" } } },
+          { "type": "button", "label": "Mark active", "action": { "verb": "set_field", "collection": "state", "field": "status", "value": "active" } },
+          { "type": "button", "label": "Open Email", "action": { "verb": "navigate", "app": "email" } },
+          { "type": "button", "label": "Docs", "action": { "verb": "open_url", "url": "https://example.com" } }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "unknown action verb is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "button", "label": "X", "action": { "verb": "delete_everything" } }] },
+      "expect": { "valid": false, "errorIncludes": ["action.verb must be one of"] }
+    },
+    {
+      "name": "button without an action is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "button", "label": "X" }] },
+      "expect": { "valid": false, "errorIncludes": ["button needs an action"] }
+    },
+    {
+      "name": "increment action without a field is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "button", "label": "+", "action": { "verb": "increment", "collection": "c" } }] },
+      "expect": { "valid": false, "errorIncludes": ["increment action needs a \"field\""] }
+    },
+    {
+      "name": "open_url action requires an http(s) url",
+      "spec": { "specVersion": 1, "components": [{ "type": "button", "label": "X", "action": { "verb": "open_url", "url": "ftp://x" } }] },
+      "expect": { "valid": false, "errorIncludes": ["open_url action needs an http(s)"] }
+    },
+    {
+      "name": "visualization + media (chart, sparkline, image, icon)",
+      "spec": {
+        "specVersion": 1,
+        "components": [
+          { "type": "form", "collection": "expenses", "fields": [{ "name": "category" }, { "name": "amount", "input": "number" }] },
+          { "type": "chart", "chartType": "bar", "title": "Spend by category", "data": { "collection": "expenses", "groupBy": "category", "agg": "sum", "field": "amount" } },
+          { "type": "chart", "chartType": "pie", "data": [{ "label": "A", "value": 3 }, { "label": "B", "value": 5 }] },
+          { "type": "chart", "chartType": "line", "data": [{ "label": "Mon", "value": 1 }, { "label": "Tue", "value": 4 }, { "label": "Wed", "value": 2 }] },
+          { "type": "sparkline", "data": [1, 3, 2, 5, 4] },
+          { "type": "image", "url": "https://example.com/x.png", "alt": "x", "caption": "a picture" },
+          { "type": "icon", "name": "star", "label": "Featured" }
+        ]
+      },
+      "expect": { "valid": true }
+    },
+    {
+      "name": "chart with an unknown type is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "chart", "chartType": "donut", "data": [{ "label": "A", "value": 1 }] }] },
+      "expect": { "valid": false, "errorIncludes": ["chartType must be bar, line, pie, area"] }
+    },
+    {
+      "name": "chart grouping over an undeclared collection is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "chart", "chartType": "bar", "data": { "collection": "ghosts", "groupBy": "kind" } }] },
+      "expect": { "valid": false, "errorIncludes": ["must exactly match a collection"] }
+    },
+    {
+      "name": "image url must be http(s)",
+      "spec": { "specVersion": 1, "components": [{ "type": "image", "url": "file:///etc/passwd" }] },
+      "expect": { "valid": false, "errorIncludes": ["url must be an http(s) URL"] }
+    },
+    {
+      "name": "icon must be a known name",
+      "spec": { "specVersion": 1, "components": [{ "type": "icon", "name": "rocket" }] },
+      "expect": { "valid": false, "errorIncludes": ["name must be one of"] }
+    },
+    {
+      "name": "wrong specVersion is rejected",
+      "spec": { "specVersion": 2, "components": [{ "type": "paragraph", "text": "x" }] },
+      "expect": { "valid": false, "errorIncludes": ["specVersion must be 1"] }
+    },
+    {
+      "name": "empty components is rejected",
+      "spec": { "specVersion": 1, "components": [] },
+      "expect": { "valid": false, "errorIncludes": ["components must be a non-empty array"] }
+    },
+    {
+      "name": "unknown component type is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "marquee" }] },
+      "expect": { "valid": false, "errorIncludes": ["unknown component type \"marquee\""] }
+    },
+    {
+      "name": "count must be a bare collection name, not a dotted path",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "form", "collection": "entries", "fields": [{ "name": "content" }] },
+        { "type": "summary_grid", "items": [{ "label": "X", "value": { "count": "entries.content" } }] }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["count must be a bare collection name"] }
+    },
+    {
+      "name": "count over an undeclared collection is rejected",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "summary_grid", "items": [{ "label": "X", "value": { "count": "ghosts" } }] }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["must exactly match a collection"] }
+    },
+    {
+      "name": "form without fields is rejected",
+      "spec": { "specVersion": 1, "components": [{ "type": "form", "collection": "x", "fields": [] }] },
+      "expect": { "valid": false, "errorIncludes": ["fields must be a non-empty array"] }
+    },
+    {
+      "name": "select field without options is rejected",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "form", "collection": "x", "fields": [{ "name": "cat", "input": "select" }] }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["select field needs options"] }
+    },
+    {
+      "name": "sections nested beyond the max depth are rejected",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "section", "components": [
+          { "type": "section", "components": [
+            { "type": "section", "components": [
+              { "type": "section", "components": [
+                { "type": "paragraph", "text": "too deep" }
+              ] }
+            ] }
+          ] }
+        ] }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["nested deeper than 4"] }
+    },
+    {
+      "name": "lookup source.url missing {query} is rejected",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "lookup", "collection": "x", "source": {
+          "url": "https://example.com/search", "label": "name", "fields": { "name": "name" }
+        } }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["must include the {query} placeholder"] }
+    },
+    {
+      "name": "detail.source.url with no {field} placeholder is rejected",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "form", "collection": "x", "fields": [{ "name": "t" }] },
+        { "type": "record_list", "collection": "x", "detail": { "source": {
+          "url": "https://example.com/item", "key": "t", "map": { "y": "y" }
+        } } }
+      ] },
+      "expect": { "valid": false, "errorIncludes": ["at least one {field} placeholder"] }
+    },
+    {
+      "name": "detail.source.url with multiple {field} placeholders is valid",
+      "spec": { "specVersion": 1, "components": [
+        { "type": "form", "collection": "loc", "fields": [{ "name": "latitude" }, { "name": "longitude" }] },
+        { "type": "record_list", "collection": "loc", "detail": { "source": {
+          "url": "https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true",
+          "map": { "temp": "current_weather.temperature" }
+        } } }
+      ] },
+      "expect": { "valid": true }
+    }
+  ]
+}
