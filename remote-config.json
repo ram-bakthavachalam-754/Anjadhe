@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "lastUpdated": "2026-07-23",
+  "lastUpdated": "2026-07-24",
   "llamacppInstall": {
     "macArm64Url": "https://github.com/ggml-org/llama.cpp/releases/download/b10015/llama-b10015-bin-macos-arm64.tar.gz",
     "macArm64Sha256": "8d3144eb71a4b9b5b9ed50512f659d1cbcd5772e30aca75e6f9a0d7d68c311a7",
@@ -10,6 +10,74 @@
     "_sha256Note": "Pins MUST match the URLs above. When bumping the llama.cpp build (bNNNNN), recompute: curl -sL <url> | shasum -a 256. A mismatch aborts the install (SECURITY-AUDIT.md M4)."
   },
   "models": [
+    {
+      "name": "gpt-oss:120b",
+      "desc": "OpenAI gpt-oss 120B MoE (5.1B active): frontier-class reasoning and tool calling for high-memory Macs",
+      "size": "63.4 GB",
+      "minRam": 96,
+      "license": "Apache 2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "gguf": {
+        "url": "https://huggingface.co/ggml-org/gpt-oss-120b-GGUF/resolve/main/gpt-oss-120b-MXFP4.gguf",
+        "file": "gpt-oss-120b-MXFP4.gguf",
+        "sha256": "582bd40f6886200101f4c4ed9f25f3fe80cc14c86e9e2b37746cd8904a0c622d"
+      },
+      "default": true
+    },
+    {
+      "name": "qwen3.6:35b-a3b",
+      "desc": "Alibaba Qwen3.6 35B MoE (3B active): near-flagship quality at small-model speed, 262K context",
+      "size": "22.1 GB",
+      "minRam": 64,
+      "license": "Apache 2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "gguf": {
+        "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+        "file": "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+        "sha256": "ac0e2c1189e055faa36eff361580e79c5bd6f8e76bffb4ce547f167d53e31a61"
+      },
+      "default": true
+    },
+    {
+      "name": "qwen3.6:27b",
+      "desc": "Alibaba Qwen3.6 27B: best-in-class agentic coding and tool calling among local models, 262K context",
+      "size": "16.8 GB",
+      "minRam": 48,
+      "license": "Apache 2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "gguf": {
+        "url": "https://huggingface.co/unsloth/Qwen3.6-27B-GGUF/resolve/main/Qwen3.6-27B-Q4_K_M.gguf",
+        "file": "Qwen3.6-27B-Q4_K_M.gguf",
+        "sha256": "5ed60d0af4650a854b1755bd392f9aef4872643dc25a254bc68043fa638392a0"
+      },
+      "default": true
+    },
+    {
+      "name": "glm4.7:flash",
+      "desc": "Z.ai GLM-4.7 Flash 30B MoE (3.6B active): fast agentic coding specialist, MIT licensed",
+      "size": "18.3 GB",
+      "minRam": 48,
+      "license": "MIT",
+      "licenseUrl": "https://opensource.org/license/mit",
+      "gguf": {
+        "url": "https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF/resolve/main/GLM-4.7-Flash-Q4_K_M.gguf",
+        "file": "GLM-4.7-Flash-Q4_K_M.gguf",
+        "sha256": "29837ed2c0fc5f51981adf8ac8083fcf80743c598381f13e9f06cbad0498b174"
+      }
+    },
+    {
+      "name": "gemma4:26b-a4b-it-qat",
+      "desc": "Google Gemma 4 26B A4B QAT: mixture-of-experts (3.8B active) — near-31B quality with small-model speed",
+      "size": "14.4 GB",
+      "minRam": 48,
+      "license": "Gemma Terms of Use",
+      "licenseUrl": "https://ai.google.dev/gemma/terms",
+      "gguf": {
+        "url": "https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf/resolve/main/gemma-4-26B_q4_0-it.gguf",
+        "file": "gemma-4-26B_q4_0-it.gguf",
+        "sha256": "3eca3b8f6d7baf218a7dd6bba5fb59a56ee25fe2d567b6f5f589b4f697eca51d"
+      }
+    },
     {
       "name": "qwen3.5:9b",
       "desc": "Alibaba Qwen3.5 9B: strong tool calling and reasoning for its size, 256K context",
@@ -28,7 +96,8 @@
       "name": "gemma4:12b-it-qat",
       "desc": "Google Gemma 4 12B QAT: 4-bit quantization-aware trained (near full-precision quality), 256K context",
       "size": "7.2 GB",
-      "minRam": 16,
+      "minRam": 32,
+      "default": true,
       "license": "Gemma Terms of Use",
       "licenseUrl": "https://ai.google.dev/gemma/terms",
       "gguf": {
@@ -52,7 +121,7 @@
     },
     {
       "name": "gemma4:e2b-it-qat",
-      "desc": "Google Gemma 4 E2B QAT: the light option for 8 GB Macs — quick chats, summaries, and email insights; the full assistant works best on the 12B model",
+      "desc": "Google Gemma 4 E2B QAT: the light option for 8 GB Macs — quick chats, summaries, and email insights; the full assistant works best on the larger models",
       "size": "3.4 GB",
       "minRam": 8,
       "gguf": {
