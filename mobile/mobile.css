@@ -1,0 +1,1124 @@
+/* ============================================================
+   Anjadhe Mobile — Minimal Book Theme, built for the phone.
+   Paper and ink. Hairlines, not boxes. Generous quiet space.
+   ============================================================ */
+
+:root {
+  --color-bg: #ffffff;
+  --color-text: #111111;
+  --color-text-secondary: #222222;
+  --color-text-tertiary: #6b6b6b;
+  --color-border: #e6e6e4;
+  --color-border-light: #f1f1ef;
+  --color-surface: #f7f7f5;
+  --color-surface-hover: #efefec;
+  --color-border-hover: #c3c3c0;
+
+  --red: #dc2626;
+  --green: #16a34a;
+  --amber: #d97706;
+
+  --font-display: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --navbar-h: 46px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #141414;
+    --color-text: #f0f0ef;
+    --color-text-secondary: #c4c4c2;
+    --color-text-tertiary: #8a8a87;
+    --color-border: #2c2c2a;
+    --color-border-light: #232321;
+    --color-surface: #1d1d1b;
+    --color-surface-hover: #262624;
+    --color-border-hover: #4a4a47;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* Fill the real visible viewport. `height:100%` resolves short of the
+   physical bottom in the Capacitor WebView (leaving the in-flow nav bar
+   floating with blank space below it); the dynamic viewport unit fills
+   edge-to-edge. vh is the fallback for older iOS. */
+html, body {
+  height: 100vh; height: 100dvh;
+  /* Keep the document non-scrollable so WKWebView can't rubber-band the
+     whole page — only #screen scrolls. overflow:hidden gives it nothing to
+     scroll and overscroll-behavior:none kills the document-level bounce.
+     NOT position:fixed — that ignores the bottom safe-area contentInset and
+     pushes the navbar under the home indicator, killing nav taps. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit; color: inherit; background: none; border: none; cursor: pointer;
+  /* Dispatch the click immediately on tap — no WKWebView double-tap-zoom
+     delay. Applies app-wide so every button (nav, rows, tiles, FAB) is snappy. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- shell -------------------------------------------------- */
+
+#app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+
+#screen {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* No -webkit-overflow-scrolling: touch — it spins up a native UIScrollView
+     that captures touches over its whole region, which makes the in-flow
+     navbar below feel dead except at the edges. Momentum scroll is the
+     default in modern WKWebView, so we don't need it. */
+  /* The bar is an in-flow sibling below, so #screen doesn't reserve its
+     height — just snug to the safe-area top + breathing room at the end. */
+  padding: calc(var(--safe-top) + 10px) 20px 20px;
+}
+
+/* ---- function bar (Today · Apps · ＋ · Search) --------------- */
+
+#navbar {
+  /* IN-FLOW flex item, NOT position:fixed. A fixed bar overlapping the
+     -webkit-overflow-scrolling scroller makes WKWebView route taps to the
+     scroller underneath, so the bar feels dead even on repeated taps. As a
+     real flex child it never overlaps #screen → taps are 100% reliable. A
+     solid background (no backdrop-filter) keeps compositing cheap and makes
+     the home-indicator strip read as part of the bar, not an empty void. */
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  /* Height includes the home-indicator safe area; the cells span the whole
+     thing and CENTER their icons (with a tiny cushion) so there's no big
+     empty strip below the icons — just the standard tab-bar look. */
+  min-height: calc(var(--navbar-h) + var(--safe-bottom));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+/* The whole cell is the tap target (a big, easy hit). `touch-action:
+   manipulation` makes WKWebView dispatch the click immediately (no tap
+   delay); all children are pointer-events:none so every tap inside the cell
+   lands on the button, not on the label/icon. */
+.nav {
+  flex: 1;
+  align-self: stretch;
+  /* Nudge the centered icon up just enough to clear the home indicator. */
+  padding-bottom: min(var(--safe-bottom), 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+.nav * { pointer-events: none; }
+.nav-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 14px;
+  border-radius: 999px;
+  transition: background 120ms var(--ease);
+}
+.nav .i { width: 21px; height: 21px; }
+.nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.01em; }
+.nav.active { color: var(--color-text); }
+.nav.active .nav-pill { background: var(--color-surface); }
+.nav:active .nav-pill { background: var(--color-surface-hover); }
+
+/* Center ＋ — a filled circle that floats slightly above the bar. */
+.nav-add { flex: 0 0 auto; padding: 0 6px; }
+.nav-add-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px; height: 46px;
+  margin-top: -10px;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.nav-add-fab .i { width: 24px; height: 24px; }
+.nav-add:active .nav-add-fab { transform: scale(0.92); }
+
+/* ---- screen header ------------------------------------------ */
+
+.screen-head { margin-bottom: 26px; }
+
+.greeting,
+.screen-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-size: 2.1rem;
+  line-height: 1.15;
+}
+.screen-sub {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+/* ---- sections ----------------------------------------------- */
+
+.section { margin-bottom: 26px; }
+
+.section-label {
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin: 0 4px 9px;
+}
+
+/* ---- card + list -------------------------------------------- */
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.list { display: flex; flex-direction: column; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  min-height: 58px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 120ms var(--ease);
+}
+.row:last-child { border-bottom: none; }
+button.row:active { background: var(--color-surface-hover); }
+
+.row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.row-title {
+  font-size: 0.97rem;
+  font-weight: 500;
+  color: var(--color-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row-title.done { color: var(--color-text-tertiary); text-decoration: line-through; }
+.row-sub {
+  font-size: 0.82rem;
+  color: var(--color-text-tertiary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row-time {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ---- check toggle ------------------------------------------- */
+
+.check {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.6px solid var(--color-border-hover);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 140ms var(--ease), border-color 140ms var(--ease);
+}
+.check.on {
+  background: var(--color-text);
+  border-color: var(--color-text);
+}
+.check .i { width: 14px; height: 14px; color: var(--color-bg); }
+
+/* ---- pill / streak ------------------------------------------ */
+
+.pill {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text-tertiary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+/* ---- empty state -------------------------------------------- */
+
+.empty {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--color-text-tertiary);
+  padding: 4px 4px 2px;
+}
+
+/* ---- journal nudge card ------------------------------------- */
+
+.nudge {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  transition: background 120ms var(--ease);
+}
+.nudge:active { background: var(--color-surface-hover); }
+.nudge-title { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; }
+.nudge-sub { font-size: 0.85rem; color: var(--color-text-tertiary); }
+
+/* ---- floating action button --------------------------------- */
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--navbar-h) + var(--safe-bottom) + 16px);
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--color-text);
+  color: var(--color-bg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  z-index: 40;
+  transition: transform 150ms var(--ease);
+}
+.fab:active { transform: scale(0.92); }
+.fab .i { width: 26px; height: 26px; }
+
+/* ---- entrance motion: one orchestrated, staggered reveal ----- */
+
+.screen-head,
+.section {
+  animation: rise 440ms var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(11px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-head, .section { animation: none; }
+  #app.detail-entering #screen { animation: none; }
+}
+
+/* ---- pushed-view top bar (app lists + record editors) ------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; /* lets the rich-text toolbar wrap onto its own row */
+  margin: -2px -6px 16px;
+}
+.topbar-back {
+  display: flex; align-items: center; gap: 1px;
+  font-size: 1rem; font-weight: 600;
+  color: var(--color-text-tertiary);
+  padding: 6px 6px 6px 2px;
+}
+.topbar-back .i { width: 22px; height: 22px; }
+.topbar-back:active { opacity: 0.5; }
+
+.topbar-actions { display: flex; gap: 2px; }
+.icon-btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-secondary);
+  border-radius: 10px;
+  transition: background 120ms var(--ease);
+}
+.icon-btn:active { background: var(--color-surface-hover); }
+.icon-btn .i { width: 21px; height: 21px; }
+.icon-btn.starred { color: var(--color-text); }
+
+/* ---- pushed view (iOS-style push) ---------------------------
+   A screen with a .topbar is a pushed view: the top bar is pinned (instead
+   of scrolling away) and the screen slides in. The function bar stays
+   visible the whole time. Toggled by App._syncDetailMode. */
+#app.detail-mode #screen {
+  padding-top: 0;
+}
+#app.detail-mode .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  /* Bleed across #screen's 20px side padding so the bar is full-width. */
+  margin: 0 -20px 14px;
+  /* Owns the safe-area top now that #screen's top padding is removed. */
+  padding: calc(var(--safe-top) + 8px) 14px 10px 12px;
+  background: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Slide-in on enter only (one-shot via .detail-entering), so the
+   in-detail App.refresh() on edits doesn't replay it. The horizontal clip
+   is scoped to the animation window so #app isn't left a scroll container. */
+#app.detail-entering { overflow-x: hidden; }
+#app.detail-entering #screen {
+  animation: push-in 280ms var(--ease);
+}
+@keyframes push-in {
+  from { transform: translateX(12%); opacity: 0.35; }
+  to   { transform: none; opacity: 1; }
+}
+
+.editor { display: flex; flex-direction: column; }
+.editor-title,
+.editor-body {
+  width: 100%;
+  border: none; outline: none; background: none;
+  color: var(--color-text);
+  -webkit-appearance: none;
+}
+.editor-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: -0.015em;
+  padding: 2px 0 8px;
+}
+.editor-body {
+  font-family: var(--font-body);
+  font-size: 1.04rem;
+  line-height: 1.65;
+  min-height: 56vh;
+  resize: none;
+}
+.editor-title::placeholder,
+.editor-body::placeholder { color: var(--color-text-tertiary); opacity: 0.65; }
+
+/* ---- rich text body (notes + journal) -----------------------
+   Renders the same HTML the Mac stores. A contenteditable grows with its
+   content, so the whole screen scrolls as one (no inner scroll) and the
+   editable area flex-fills (no bottom dead-space). */
+.rich-body {
+  font-family: var(--font-body);
+  font-size: 1.04rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.rich-body:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.rich-body > :first-child { margin-top: 0; }
+.rich-body p { margin: 0 0 0.85em; }
+.rich-body h1, .rich-body h2, .rich-body h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 1.1em 0 0.4em;
+}
+.rich-body h1 { font-size: 1.6rem; }
+.rich-body h2 { font-size: 1.34rem; }
+.rich-body h3 { font-size: 1.16rem; }
+.rich-body strong, .rich-body b { font-weight: 700; }
+.rich-body em, .rich-body i { font-style: italic; }
+.rich-body u { text-decoration: underline; }
+.rich-body s, .rich-body strike, .rich-body del { text-decoration: line-through; }
+.rich-body ul, .rich-body ol { margin: 0 0 0.85em; padding-left: 1.4em; }
+.rich-body li { margin: 0.2em 0; }
+.rich-body a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rich-body blockquote {
+  margin: 0.85em 0;
+  padding: 2px 0 2px 0.9em;
+  border-left: 2px solid var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+.rich-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: var(--color-surface);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.rich-body pre {
+  margin: 0.85em 0;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border-radius: var(--r-sm);
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.rich-body pre code { background: none; padding: 0; }
+.rich-body hr { border: 0; border-top: 1px solid var(--color-border); margin: 1.2em 0; }
+.rich-body img { max-width: 100%; height: auto; border-radius: var(--r-sm); }
+
+/* Flex-fill: editable area grows to fill the screen (no dead-space) while
+   the content itself is what makes #screen scroll. Scoped to rich editors
+   via #app.doc-editing so form/list screens keep normal flow. */
+/* The rich editor fills to the bottom safe area (it has no FAB and the
+   contenteditable is itself the tap target), so there's no dead strip
+   under the text. */
+#app.doc-editing #screen { display: flex; flex-direction: column; }
+.rich-editor { flex: 1; display: flex; flex-direction: column; }
+.rich-editor .editor-title { flex: 0 0 auto; }
+.rich-editor .rich-body { flex: 1 1 auto; }
+
+/* Formatting toolbar — wraps to its own row inside the sticky top bar
+   (.topbar already sets flex-wrap). */
+.rich-toolbar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.rich-tool {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.rich-tool:active { background: var(--color-surface-hover); }
+.rich-tool.rt-b { font-weight: 800; }
+.rich-tool.rt-i { font-style: italic; }
+
+/* ---- mood selector (journal) -------------------------------- */
+
+.mood-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.mood {
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg);
+  transition: background 130ms var(--ease), color 130ms var(--ease), border-color 130ms var(--ease);
+}
+.mood.on {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+/* ---- pinned-note marker ------------------------------------- */
+
+.row-star {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 5px;
+  color: var(--color-text-tertiary);
+}
+.row-star .i { width: 13px; height: 13px; }
+
+/* ---- split row: a tappable check + a tappable body ---------- */
+
+button.row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 0;
+}
+.row-main:active { opacity: 0.55; }
+.check { -webkit-appearance: none; }
+.check.muted { border-style: dashed; opacity: 0.45; }
+.check:not(.on):active { background: var(--color-surface-hover); }
+
+/* ---- task group label --------------------------------------- */
+
+.group-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin: 0 4px 9px;
+}
+.group-label .count { font-weight: 600; opacity: 0.8; }
+.group-label.overdue { color: var(--red); }
+
+/* ---- forms (create / edit) ---------------------------------- */
+
+.form { display: flex; flex-direction: column; gap: 22px; }
+
+.field { display: flex; flex-direction: column; gap: 9px; }
+.field-label {
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-left: 2px;
+}
+.field-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+  padding: 13px 14px;
+  -webkit-appearance: none;
+  outline: none;
+}
+.field-input:focus { border-color: var(--color-border-hover); }
+
+/* Native dropdown styled to match .field-input, with a chevron affordance. */
+select.field-select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+/* Toggle chips (advance reminders, etc.) */
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  padding: 8px 13px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  transition: background 120ms var(--ease), color 120ms var(--ease), border-color 120ms var(--ease);
+}
+.chip.on { background: var(--color-text); border-color: var(--color-text); color: var(--color-bg); }
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.seg {
+  flex: 1;
+  padding: 11px 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  border-right: 1px solid var(--color-border);
+  transition: background 120ms var(--ease), color 120ms var(--ease);
+}
+.seg:last-child { border-right: none; }
+.seg.on { background: var(--color-text); color: var(--color-bg); }
+
+.day-row { display: flex; gap: 7px; }
+.day {
+  flex: 1;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  transition: background 120ms var(--ease), color 120ms var(--ease), border-color 120ms var(--ease);
+}
+.day.on { background: var(--color-text); border-color: var(--color-text); color: var(--color-bg); }
+
+.danger-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--red);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+}
+.danger-btn:active { background: var(--color-surface-hover); }
+
+/* ---- header actions (sync indicator + settings gear) -------- */
+
+.screen-head.has-action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: -6px -9px 0 0;
+}
+.head-action {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-tertiary);
+  border-radius: 50%;
+  transition: background 120ms var(--ease), color 150ms var(--ease);
+}
+.head-action:active { background: var(--color-surface-hover); }
+.head-action svg { width: 23px; height: 23px; }
+
+/* Sync indicator — a refresh glyph whose color and animation reflect
+   the channel state. Stays out of the way at idle; reassures during
+   work; warns on failure. Tap to force a sync. */
+.head-sync svg { width: 19px; height: 19px; }
+.head-sync[data-state="idle"]       { color: var(--color-text-tertiary); opacity: 0.55; }
+.head-sync[data-state="syncing"]    { color: var(--color-text-secondary); }
+.head-sync[data-state="connecting"] { color: var(--color-text-tertiary); }
+.head-sync[data-state="error"]      { color: #dc2626; }
+.head-sync[data-state="offline"]    { color: var(--color-text-tertiary); opacity: 0.4; }
+.head-sync[data-state="syncing"] svg,
+.head-sync[data-state="connecting"] svg {
+  animation: head-sync-spin 1.2s linear infinite;
+}
+@keyframes head-sync-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .head-sync[data-state="syncing"] svg,
+  .head-sync[data-state="connecting"] svg { animation: none; }
+}
+
+/* ---- settings: paired devices ------------------------------- */
+
+.pair-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+}
+.pair-dot {
+  flex-shrink: 0;
+  width: 9px; height: 9px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
+}
+.pair-dot.on { background: var(--green); }
+.pair-status-main { flex: 1; min-width: 0; }
+.pair-status-title { font-size: 0.97rem; font-weight: 600; }
+.pair-status-sub {
+  margin-top: 3px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--color-text-tertiary);
+}
+
+.btn-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+.btn-primary,
+.btn-secondary {
+  width: 100%;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  transition: opacity 120ms var(--ease), background 120ms var(--ease);
+}
+.btn-primary { background: var(--color-text); color: var(--color-bg); }
+.btn-primary:active { opacity: 0.7; }
+.btn-secondary {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-secondary:active { background: var(--color-surface-hover); }
+
+.pair-hint {
+  margin: 14px 4px 18px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--color-text-tertiary);
+}
+
+/* ---- home: "all apps" launcher grid ------------------------- */
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
+}
+.app-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 19px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background 120ms var(--ease);
+}
+.app-tile:active { background: var(--color-surface-hover); }
+.app-tile .tab-i { width: 25px; height: 25px; }
+.app-tile-label { font-size: 0.8rem; font-weight: 600; }
+
+/* ---- search box (Apps filter + Search root) ----------------- */
+
+.apps-search {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  margin-bottom: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+.apps-search::placeholder { color: var(--color-text-tertiary); }
+.apps-search:focus { border-color: var(--color-border-hover); }
+/* iOS search clear/decoration tidy-up */
+.apps-search::-webkit-search-decoration,
+.apps-search::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.search-results { margin-top: 2px; }
+
+/* ---- calendar: month grid + agenda -------------------------- */
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cal-month {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
+}
+.cal-arrow {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  color: var(--color-text-secondary);
+  transition: background 120ms var(--ease);
+}
+.cal-arrow:active { background: var(--color-surface-hover); }
+.cal-arrow .i { width: 19px; height: 19px; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text-tertiary);
+  padding-bottom: 7px;
+}
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 10px;
+  color: var(--color-text);
+  transition: background 120ms var(--ease);
+}
+.cal-num { font-size: 0.86rem; font-weight: 600; line-height: 1; }
+.cal-cell.dim .cal-num { color: var(--color-text-tertiary); opacity: 0.5; }
+.cal-cell.today:not(.sel) { box-shadow: inset 0 0 0 1.5px var(--color-border-hover); }
+.cal-cell.sel { background: var(--color-text); }
+.cal-cell.sel .cal-num { color: var(--color-bg); }
+.cal-cell:not(.sel):active { background: var(--color-surface-hover); }
+.cal-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: transparent;
+}
+.cal-dot.on { background: var(--color-text-tertiary); }
+.cal-cell.sel .cal-dot.on { background: var(--color-bg); }
+
+/* a non-button row that still responds to touch (calendar events) */
+.row.tappable { cursor: pointer; }
+.row.tappable:active { background: var(--color-surface-hover); }
+
+/* ---- bookmarks: favicon tile -------------------------------- */
+
+.bm-fav {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+}
+.bm-fav img { width: 19px; height: 19px; object-fit: contain; }
+
+/* a textarea sharing the boxed field style (bookmark description) */
+textarea.field-input {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.5;
+}
+
+/* ---- prompt feed (read-only) -------------------------------- */
+
+.feed-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  background: var(--color-bg);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.feed-card:last-child { margin-bottom: 0; }
+.feed-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.feed-card-title {
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--color-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-card-meta {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+.feed-card--tap:active { background: var(--color-surface); }
+.feed-card-body {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+/* Clamp the card preview; the full post opens on tap. The fade hints "more". */
+.feed-card-body--clamped {
+  position: relative;
+  max-height: 8.4em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+.feed-card--error { border-color: var(--red); }
+.feed-card-error { font-size: 0.9rem; color: var(--red); }
+
+.feed-post { padding: 4px 2px; }
+.feed-post-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 4px; }
+.feed-post-meta { font-size: 0.78rem; color: var(--color-text-tertiary); margin: 0 0 16px; }
+.feed-post-body { font-size: 1rem; line-height: 1.65; color: var(--color-text); word-break: break-word; }
+
+/* Rendered-markdown blocks (shared by card body + full post), mirroring the
+   desktop .feed-card-body rules so structure reads the same on both. */
+.feed-card-body p, .feed-post-body p { margin: 0 0 0.8em; }
+.feed-card-body p:last-child, .feed-post-body p:last-child { margin-bottom: 0; }
+.feed-card-body h3, .feed-card-body h4, .feed-card-body h5,
+.feed-post-body h3, .feed-post-body h4, .feed-post-body h5 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1em 0 0.35em;
+  color: var(--color-text);
+}
+.feed-card-body h3, .feed-post-body h3 { font-size: 1.16rem; }
+.feed-card-body h4, .feed-post-body h4 { font-size: 1.02rem; }
+.feed-card-body h5, .feed-post-body h5 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+.feed-card-body h3:first-child, .feed-card-body h4:first-child, .feed-card-body h5:first-child,
+.feed-post-body h3:first-child, .feed-post-body h4:first-child, .feed-post-body h5:first-child { margin-top: 0; }
+.feed-card-body ul, .feed-card-body ol,
+.feed-post-body ul, .feed-post-body ol { margin: 0.4em 0 0.8em; padding-left: 1.4em; }
+.feed-card-body li, .feed-post-body li { margin: 0.2em 0; }
+.feed-card-body strong, .feed-post-body strong { font-weight: 700; }
+.feed-card-body em, .feed-post-body em { font-style: italic; }
+.feed-card-body a, .feed-post-body a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+.feed-card-body code, .feed-post-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  padding: 1px 5px;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+.feed-card-body hr, .feed-post-body hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.1em 0;
+}
+.feed-card-body table, .feed-post-body table {
+  border-collapse: collapse;
+  margin: 0.6em 0;
+  font-size: 0.88rem;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+.feed-card-body th, .feed-card-body td,
+.feed-post-body th, .feed-post-body td {
+  border: 1px solid var(--color-border);
+  padding: 5px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+.feed-card-body th, .feed-post-body th { background: var(--color-surface); font-weight: 700; }
+
+/* ---- copy / action toast ------------------------------------ */
+
+#m-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--navbar-h) + var(--safe-bottom) + 26px);
+  transform: translate(-50%, 8px);
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 60;
+  transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+#m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- capture sheet (the ＋ button) -------------------------- */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: opacity 220ms var(--ease);
+  z-index: 70;
+}
+.sheet-backdrop.show { opacity: 1; }
+
+.sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 71;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px calc(var(--safe-bottom) + 16px);
+  background: var(--color-bg);
+  border-top-left-radius: var(--r-lg);
+  border-top-right-radius: var(--r-lg);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.22);
+  transform: translateY(100%);
+  transition: transform 240ms var(--ease);
+}
+.sheet.show { transform: translateY(0); }
+.sheet-grip {
+  width: 38px; height: 4px;
+  border-radius: 999px;
+  background: var(--color-border-hover);
+  margin: 2px auto 10px;
+}
+.sheet-title {
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  padding: 2px 12px 8px;
+}
+.sheet-item {
+  text-align: left;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--color-text);
+  padding: 15px 12px;
+  border-radius: var(--r-md);
+  transition: background 120ms var(--ease);
+}
+.sheet-item:active { background: var(--color-surface-hover); }

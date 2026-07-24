@@ -1,0 +1,64 @@
+# PUBLIC repo release workflow — lands in Anjadhe/Anjadhe as
+# .github/workflows/release.yml (copied there by the private repo's mirror.yml).
+# Do NOT rename it here; the mirror job places it at the right path.
+#
+# Triggered when mirror.yml force-pushes a `v*` tag to this repo. Builds the
+# universal macOS DMG, signs + notarizes it (build.mac.notarize is true in
+# package.json), and publishes a GitHub Release using the repo's own ephemeral
+# GITHUB_TOKEN — no long-lived PAT is involved in publishing.
+#
+# Secrets to add in the PUBLIC repo (Settings > Secrets and variables > Actions):
+#   ENV_PRODUCTION        — full contents of .env.production (the bundled Google
+#                           OAuth client id/secret). Written to .env.production at
+#                           build time so electron-builder bundles it. Already
+#                           extractable from the shipped DMG, so this is not a new
+#                           exposure — it just keeps it out of git.
+#   MAC_CSC_LINK          — base64 of the Developer ID Application .p12 certificate
+#   MAC_CSC_KEY_PASSWORD  — password for that .p12
+#   APPLE_API_KEY_P8      — contents of the App Store Connect API key (.p8)
+#   APPLE_API_KEY_ID      — the API key id
+#   APPLE_API_ISSUER      — the API key issuer id
+name: Build & publish release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # lets electron-builder create the GitHub Release via GITHUB_TOKEN
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize build-time secrets
+        env:
+          ENV_PRODUCTION: ${{ secrets.ENV_PRODUCTION }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$ENV_PRODUCTION" > .env.production
+          printf '%s' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+
+      - name: Build, sign, notarize & publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}          # publish to THIS repo's Releases
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_API_KEY: ${{ runner.temp }}/AuthKey.p8   # electron-builder notarize (API key)
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: npx electron-builder --mac --publish always

@@ -1,0 +1,569 @@
+/* ===================================
+   Help App
+   =================================== */
+
+/* A shared, centered column width for the breadcrumb, search, home, and
+   article — the header bar is full-bleed by default (app-view-full), so it
+   must be centered to the same width or it won't line up with the content. */
+.help-hero,
+.help-root,
+.help-doc,
+#help-view .app-header-bar {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Persistent search bar — sits above both the home and the article. */
+.help-hero {
+    margin-bottom: var(--space-2xl);
+}
+
+.help-hero-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+    margin-bottom: var(--space-lg);
+}
+
+/* Full-width search with an inset magnifier */
+.help-search-wrap {
+    position: relative;
+}
+
+.help-search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+/* Scoped under .help-hero to outrank the base input[type="text"] rule. */
+.help-hero .help-search {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px 14px 46px;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.help-hero .help-search::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.help-hero .help-search:focus {
+    outline: none;
+    background: var(--color-bg);
+    border-color: var(--color-border-hover);
+}
+
+.help-search-hit {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+    border-radius: 3px;
+    padding: 0 1px;
+}
+
+.help-search-empty {
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    padding: var(--space-lg) 0;
+}
+
+.help-section {
+    margin-bottom: var(--space-xl);
+}
+
+.help-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Section headings double as dividers within a long chapter. */
+.help-heading {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    margin-bottom: var(--space-sm);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.help-doc-body > .help-heading:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.help-doc-body p {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.75;
+    margin-bottom: var(--space-sm);
+}
+
+.help-doc-body .help-path {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    word-break: break-all;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--space-sm);
+}
+
+.help-app-list {
+    list-style: none;
+    padding: 0;
+}
+
+.help-app-list li {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.75;
+    margin-bottom: var(--space-sm);
+    padding-left: var(--space-md);
+    position: relative;
+}
+
+.help-app-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-text-tertiary);
+}
+
+.help-app-list li strong {
+    color: var(--color-text);
+}
+
+.help-doc-body code,
+.help-app-list code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.05em 0.35em;
+    word-break: break-word;
+}
+
+.help-keyboard-table {
+    width: 100%;
+    font-size: var(--text-sm);
+    border-collapse: collapse;
+}
+
+.help-keyboard-table td {
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.help-keyboard-table td:first-child {
+    color: var(--color-text);
+    font-weight: 500;
+    white-space: nowrap;
+    width: 160px;
+}
+
+.help-keyboard-table td:last-child {
+    color: var(--color-text-secondary);
+}
+
+.help-kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: var(--text-xs);
+    font-family: inherit;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    color: var(--color-text);
+}
+
+/* ===================================
+   Home — sections rail · article cards
+   =================================== */
+
+.help-browse {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+}
+
+.help-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.help-sections-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+    padding-left: 12px;
+}
+
+.help-section-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.help-section-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.help-section-item.active {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.help-section-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+}
+
+.help-section-item.active .help-section-icon {
+    color: var(--color-text);
+}
+
+.help-section-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.help-section-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    margin-bottom: var(--space-lg);
+}
+
+.help-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.help-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    text-align: left;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.help-card:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+
+.help-card-title {
+    min-width: 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.help-card-arrow {
+    flex-shrink: 0;
+    font-size: var(--text-lg);
+    color: var(--color-text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.help-card:hover .help-card-arrow {
+    color: var(--color-text);
+}
+
+/* Stack the cards, then collapse the rail into a chip row. */
+@media (max-width: 820px) {
+    .help-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .help-browse {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-lg);
+    }
+    .help-sections {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+    .help-sections-label {
+        display: none;
+    }
+    .help-section-item {
+        width: auto;
+        border: 1px solid var(--color-border);
+    }
+}
+
+/* ===================================
+   Chapter page — rail · body · contents
+   =================================== */
+
+.help-doc {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr) 12rem;
+    column-gap: var(--space-2xl);
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+/* Articles with fewer than two headings have no contents rail — drop the
+   third column so the body isn't stranded beside an empty gap. */
+.help-doc--no-toc {
+    grid-template-columns: 13rem minmax(0, 1fr);
+}
+
+.help-doc-nav,
+.help-doc-toc {
+    position: sticky;
+    top: 54px;
+    align-self: start;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+}
+
+.help-doc-main {
+    min-width: 0;
+    max-width: 44rem;
+}
+
+/* Left rail — articles in this section */
+.help-doc-nav-label {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    padding-left: 12px;
+}
+
+.help-doc-nav-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    line-height: 1.4;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.help-doc-nav-item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.help-doc-nav-item.active {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* Body header */
+.help-eyebrow {
+    font-family: var(--font-serif);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-xs);
+}
+
+.help-doc-header {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.help-doc-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.help-doc-lead {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* Right rail — on this page */
+.help-toc-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.help-toc-list {
+    list-style: none;
+    padding: 0;
+    border-left: 1px solid var(--color-border);
+}
+
+.help-toc-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    padding: 4px 0 4px 14px;
+    font-family: inherit;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.help-toc-link:hover {
+    color: var(--color-text);
+}
+
+.help-toc-link.active {
+    color: var(--color-text);
+    border-left-color: var(--color-text);
+}
+
+/* Prev / next */
+.help-doc-pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+}
+
+.help-pager-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color var(--transition-fast);
+}
+
+.help-pager-card:hover {
+    border-color: var(--color-border-hover);
+}
+
+.help-pager-next {
+    text-align: right;
+}
+
+.help-pager-dir {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+}
+
+.help-pager-label {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+}
+
+/* Responsive: drop the contents rail, then the chapter rail. */
+@media (max-width: 1160px) {
+    .help-doc {
+        grid-template-columns: 13rem minmax(0, 1fr);
+    }
+    .help-doc-toc {
+        display: none;
+    }
+}
+
+@media (max-width: 880px) {
+    .help-doc {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .help-doc-nav {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .help-chapter {
+        grid-template-columns: auto 1fr auto;
+    }
+    .help-chapter-meta {
+        display: none;
+    }
+}
